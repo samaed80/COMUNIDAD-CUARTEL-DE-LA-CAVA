@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comunidad de vecinos Cuartel de la Cava</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="overrides.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">C</span><span>Cuartel<br><em>de la Cava</em></span></div>
+      <div class="building"><span class="building-dot"></span><span>Comunidad de vecinos Cuartel de la Cava</span><span>⌄</span></div>
+      <nav class="side-nav" aria-label="Navegación principal">
+        <button class="nav-item active" data-section="inicio"><span>⌂</span> Inicio</button>
+        <button class="nav-item" data-section="avisos"><span>✦</span> Avisos</button>
+        <button class="nav-item" data-section="incidencias"><span>⌁</span> Incidencias</button>
+        <button class="nav-item" data-section="documentos"><span>▤</span> Documentos</button>
+        <button class="nav-item" data-section="calendario"><span>□</span> Calendario</button>
+      </nav>
+      <div class="sidebar-bottom"><span class="role-label">TU PERFIL DE PRUEBA</span><strong id="roleName">Presidente y administrador</strong><p id="roleDescription">Gestionas la información que se publica para toda la comunidad.</p><div class="role-switcher"><button class="role-choice active" data-role="admin">Presidencia</button><button class="role-choice" data-role="neighbor">Vecino</button></div><button class="support-link">? Ayuda rápida</button></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div class="mobile-brand"><span class="brand-mark">C</span> Comunidad al día</div><div class="top-actions"><button class="icon-btn" aria-label="Notificaciones">♢<i></i></button><button class="avatar" aria-label="Abrir perfil">JM</button></div></header>
+      <section class="welcome"><div><p class="eyebrow">MARTES, 29 DE SEPTIEMBRE DE 2026</p><h1>Comunidad de vecinos<br><em>Cuartel de la Cava</em></h1></div><button class="primary-btn" id="newNoticeBtn">＋ Publicar aviso</button></section>
+      <section class="quick-actions"><button id="quickIncidentBtn"><span class="action-icon coral">⌁</span><strong>Comunicar una incidencia</strong><small>Envía una incidencia o sugerencia a presidencia.</small></button><button data-section="documentos"><span class="action-icon blue">▤</span><strong>Consultar documentos</strong><small>Actas, normas y contratos de la comunidad.</small></button><button data-section="calendario"><span class="action-icon green">□</span><strong>Ver calendario</strong><small>Reuniones, obras y mantenimientos.</small></button></section>
+      <div class="content-grid">
+        <section class="main-column" id="avisos"><div class="section-heading"><div><p class="eyebrow">INFORMACIÓN RECIENTE</p><h2>Últimos avisos</h2><p class="permission-note" id="noticePermission">Solo la presidencia puede publicar avisos visibles para toda la comunidad.</p></div><button class="plain-link" id="viewAllBtn">Ver todos →</button></div><div class="notice-list" id="noticeList"></div></section>
+        <aside class="right-column"><section class="resident-card"><div class="card-top"><span class="status-dot"></span><span>MI PERFIL</span><button aria-label="Editar perfil">•••</button></div><h3>Javier Martínez</h3><p>Portal 2 · 3º B</p><div class="profile-line"><span>Teléfono verificado</span><b>✓</b></div><button class="outline-btn" id="profileBtn">Ver mi perfil</button></section><section class="next-card"><div class="card-top"><span class="eyebrow">PRÓXIMO</span><span class="event-date">30 SEP</span></div><h3>Revisión del ascensor</h3><p>Mañana · 09:00 · Portal 1 y 2</p><button class="plain-link" data-section="calendario">Ver calendario →</button></section></aside>
+      </div>
+      <section class="activity-section" id="incidencias"><div class="section-heading"><div><p class="eyebrow">SEGUIMIENTO</p><h2 id="incidentHeading">Incidencias abiertas</h2><p class="permission-note" id="incidentPermission">Gestiona las incidencias que te comunican los vecinos.</p></div><button class="secondary-btn" id="newIncidentBtn">＋ Nueva incidencia</button></div><div class="incident-list" id="incidentList"></div></section>
+      <section class="bottom-preview" id="documentos"><div><p class="eyebrow">TODO ORDENADO</p><h2>Documentos de la comunidad</h2><p>Consulta las actas, las normas y los documentos importantes cuando los necesites.</p></div><button class="secondary-btn" data-section="documentos">Abrir documentos</button></section>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="Navegación móvil"><button class="selected" data-section="inicio">⌂<small>Inicio</small></button><button data-section="avisos">✦<small>Avisos</small></button><button data-section="incidencias">⌁<small>Incidencias</small></button><button data-section="documentos">▤<small>Documentos</small></button></nav>
+  <div class="modal-backdrop" id="registerModal" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="registerTitle"><button class="modal-close" data-close="registerModal" aria-label="Cerrar">×</button><p class="eyebrow">PRIMER ACCESO</p><h2 id="registerTitle">Crea tu acceso</h2><p class="modal-intro">Usaremos tus datos solo para identificarte dentro de la comunidad.</p><form id="registerForm"><label>Teléfono<input type="tel" name="phone" placeholder="600 000 000" required></label><label>Nombre y apellidos<input type="text" name="name" placeholder="Tu nombre completo" required></label><div class="two-fields"><label>Piso<input type="text" name="floor" placeholder="3º B" required></label><label>Código de invitación<input type="text" name="invite" placeholder="De tu presidente" required></label></div><label class="check-label"><input type="checkbox" required> He leído la información sobre el uso de mis datos.</label><button class="primary-btn" type="submit">Continuar</button></form></section></div>
+  <div class="modal-backdrop" id="noticeModal" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="noticeTitle"><button class="modal-close" data-close="noticeModal" aria-label="Cerrar">×</button><p class="eyebrow">NUEVO AVISO</p><h2 id="noticeTitle">Publicar aviso</h2><form id="noticeForm"><label>Título<input type="text" name="title" placeholder="Título del aviso" required></label><label>Mensaje<textarea name="message" placeholder="Escribe la información para los vecinos" rows="4" required></textarea></label><div class="modal-actions"><button class="secondary-btn" type="button" data-close="noticeModal">Cancelar</button><button class="primary-btn" type="submit">Publicar aviso</button></div></form></section></div>
+  <div class="modal-backdrop" id="incidentModal" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="incidentTitle"><button class="modal-close" data-close="incidentModal" aria-label="Cerrar">×</button><p class="eyebrow" id="incidentEyebrow">COMUNICACIÓN PRIVADA</p><h2 id="incidentTitle">Enviar a presidencia</h2><p class="modal-intro" id="incidentIntro">Esta comunicación la recibirá la presidencia y decidirá si debe publicarse.</p><form id="incidentForm"><label>Tipo<select name="type"><option>Incidencia</option><option>Sugerencia</option></select></label><label>Título<input type="text" name="title" placeholder="Por ejemplo: luz fundida en el portal" required></label><label>Mensaje<textarea name="message" placeholder="Cuéntanos qué ocurre" rows="4" required></textarea></label><label>Portal o zona<input type="text" name="location" placeholder="Por ejemplo: Portal 2, garaje"></label><div class="modal-actions"><button class="secondary-btn" type="button" data-close="incidentModal">Cancelar</button><button class="primary-btn" type="submit" id="incidentSubmit">Enviar a presidencia</button></div></form></section></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
