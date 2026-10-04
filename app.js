@@ -32,4 +32,31 @@ document.querySelector('#incidentForm').onsubmit=e=>{e.preventDefault(); closeMo
 document.querySelectorAll('.role-choice').forEach(button=>button.onclick=()=>{ currentRole=button.dataset.role; document.querySelectorAll('.role-choice').forEach(item=>item.classList.toggle('active',item===button)); const admin=currentRole==='admin'; document.querySelector('#roleName').textContent=admin?'Presidente y administrador':'Vecino'; document.querySelector('#roleDescription').textContent=admin?'Gestionas la información que se publica para toda la comunidad.':'Puedes consultar la información y enviar comunicaciones privadas a presidencia.'; document.querySelector('#topRole').textContent=admin?'Presidencia':'Vecino'; document.querySelector('.avatar').textContent=admin?'ES':'V'; document.querySelector('#newNoticeBtn').hidden=!admin; document.querySelector('#noticePermission').textContent=admin?'Solo la presidencia puede publicar avisos visibles para toda la comunidad.':'Aquí puedes consultar los avisos publicados por la presidencia.'; document.querySelector('#incidentHeading').textContent=admin?'Incidencias abiertas':'Incidencias y sugerencias'; document.querySelector('#incidentPermission').textContent=admin?'Gestiona las incidencias que te comunican los vecinos.':'Tus comunicaciones se envían a presidencia y no se publican directamente.'; document.querySelector('#newIncidentBtn').textContent=admin?'＋ Registrar incidencia':'＋ Enviar incidencia o sugerencia'; document.querySelector('#incidentTitle').textContent=admin?'Registrar incidencia':'Enviar a presidencia'; document.querySelector('#incidentIntro').textContent=admin?'Registra una incidencia para hacer seguimiento.':'Esta comunicación la recibirá la presidencia y decidirá si debe publicarse.'; document.querySelector('#incidentSubmit').textContent=admin?'Guardar incidencia':'Enviar a presidencia'; document.querySelector('#solicitudes').hidden=!admin; document.querySelector('#profileLabel').textContent=admin?'PRESIDENTE Y ADMINISTRADOR':'VECINO'; document.querySelector('#profileName').textContent=admin?'Eduardo Santamaría':'Nombre del vecino'; document.querySelector('#profileAddress').textContent=admin?'Portal 1 · 1.º F':'Portal y piso'; document.querySelector('#profileStatus').textContent=admin?'Cuenta administradora':'Cuenta pendiente de verificación'; });
 document.querySelectorAll('.approve-btn').forEach(button=>button.onclick=()=>{button.closest('.approval-card').remove();showToast('Vecino aceptado. Ya puede acceder a la comunidad.');});
 document.querySelectorAll('.reject-btn').forEach(button=>button.onclick=()=>showToast('Solicitud marcada para revisión.'));
+const invitationCode = new URLSearchParams(window.location.search).get('invite');
+if(invitationCode){
+  currentRole='neighbor';
+  document.querySelectorAll('.role-choice').forEach(item=>item.classList.remove('active'));
+  document.querySelector('.role-choice[data-role="neighbor"]')?.classList.add('active');
+  document.querySelector('#roleName').textContent='Vecino';
+  document.querySelector('#roleDescription').textContent='Puedes consultar la información y enviar comunicaciones privadas a presidencia.';
+  document.querySelector('#topRole').textContent='Vecino';
+  document.querySelector('.avatar').textContent='V';
+  document.querySelector('#newNoticeBtn').hidden=true;
+  document.querySelector('#noticePermission').textContent='Aquí puedes consultar los avisos publicados por la presidencia.';
+  document.querySelector('#incidentHeading').textContent='Incidencias y sugerencias';
+  document.querySelector('#incidentPermission').textContent='Tus comunicaciones se envían a presidencia y no se publican directamente.';
+  document.querySelector('#newIncidentBtn').textContent='＋ Enviar incidencia o sugerencia';
+  document.querySelector('#incidentTitle').textContent='Enviar a presidencia';
+  document.querySelector('#incidentIntro').textContent='Esta comunicación la recibirá la presidencia y decidirá si debe publicarse.';
+  document.querySelector('#incidentSubmit').textContent='Enviar a presidencia';
+  document.querySelector('#solicitudes').hidden=true;
+  document.querySelector('#profileLabel').textContent='VECINO';
+  document.querySelector('#profileName').textContent='Nuevo vecino';
+  document.querySelector('#profileAddress').textContent='Pendiente de confirmar';
+  document.querySelector('#profileStatus').textContent='Solicitud pendiente';
+  const inviteInput=document.querySelector('#registerForm input[name="invite"]');
+  inviteInput.value=invitationCode;
+  inviteInput.readOnly=true;
+  window.setTimeout(()=>openModal('registerModal'),350);
+}
 renderCurrentDate(); renderNotices(); renderIncidents();
