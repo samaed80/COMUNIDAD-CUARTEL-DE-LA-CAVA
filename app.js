@@ -17,7 +17,7 @@ function showToast(message){ toast.textContent=message; toast.classList.add('sho
 document.querySelector('#newNoticeBtn').onclick=()=>openModal('noticeModal');
 document.querySelector('#newIncidentBtn').onclick=()=>openModal('incidentModal');
 document.querySelector('#quickIncidentBtn').onclick=()=>openModal('incidentModal');
-document.querySelector('#profileBtn').onclick=()=>openModal('registerModal');
+document.querySelector('#profileBtn').onclick=()=> currentRole==='admin' ? showToast('Perfil de Eduardo Santamaría · presidente y administrador.') : openModal('registerModal');
 document.querySelector('#viewAllBtn').onclick=()=>showToast('Aquí aparecerá el historial completo de avisos.');
 document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>closeModal(button.dataset.close));
 document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.onclick=e=>{if(e.target===backdrop)closeModal(backdrop.id)});
