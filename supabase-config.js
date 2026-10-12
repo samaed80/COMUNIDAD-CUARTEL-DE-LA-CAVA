@@ -1,0 +1,4 @@
+window.SUPABASE_CONFIG = {
+  url: 'https://kfshosgybldzqevtduem.supabase.co',
+  publishableKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmc2hvc2d5YmxkenFldnRkdWVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MzU1NDMsImV4cCI6MjEwNjAxMTU0M30.nskRoEEuymA2ncfzfrAO9P2Nqud1o9X8F4USQj9c23U'
+};
