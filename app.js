@@ -48,7 +48,18 @@ async function deleteRemoteDocument(path,id){ if(!supabaseClient || !supabaseSes
 async function refreshRemoteDocuments(){ if(!supabaseClient || !supabaseSession) return false; const {data,error}=await supabaseClient.from('documents').select('*').order('created_at',{ascending:false}); if(error){showToast(`No se pudieron consultar los documentos: ${error.message}`); return false;} remoteDocuments=data||[]; documentSource='remote'; renderDocuments(); return true; }
 async function refreshRemoteNotices(){if(!supabaseClient||!supabaseSession)return false;const {data,error}=await supabaseClient.from('community_notices').select('*').order('event_date',{ascending:true}).order('created_at',{ascending:false});if(error){showToast(`No se pudieron consultar los avisos: ${error.message}`);return false;}notices.splice(0,notices.length,...(data||[]).map(item=>{const dateInfo=formatNoticeDate(item.event_date);return {...item,date:dateInfo.day,month:dateInfo.month,eventDate:item.event_date};}));renderNotices();renderCalendar();return true;}
 async function deleteRemoteNotice(id){if(!supabaseClient||!supabaseSession||currentRole!=='admin')return;const {error}=await supabaseClient.from('community_notices').delete().eq('id',id);if(error){showToast(`No se pudo eliminar el aviso: ${error.message}`);return;}await refreshRemoteNotices();showToast('Aviso eliminado.');}
-function subscribeToRealtime(){if(!supabaseClient||!supabaseSession)return;if(realtimeChannel)supabaseClient.removeChannel(realtimeChannel);realtimeChannel=supabaseClient.channel('community-live').on('postgres_changes',{event:'*',schema:'public',table:'community_notices'},()=>refreshRemoteNotices()).on('postgres_changes',{event:'*',schema:'public',table:'documents'},()=>refreshRemoteDocuments()).on('postgres_changes',{event:'*',schema:'public',table:'community_access_requests'},()=>{if(currentRole==='admin'){refreshAccessRequests();refreshApprovedResidents();}}).subscribe();}
+async function refreshNeighborAccess(){
+  if(!invitationCode||!supabaseClient||!supabaseSession)return;
+  const wasApproved=neighborApproved;
+  await checkNeighborAccess();
+  if(neighborApproved){
+    await refreshRemoteDocuments();
+    await refreshRemoteNotices();
+  }
+  applyAccessGate();
+  if(neighborApproved&&!wasApproved)showToast('Acceso autorizado. Ya puedes consultar la comunidad.');
+}
+function subscribeToRealtime(){if(!supabaseClient||!supabaseSession)return;if(realtimeChannel)supabaseClient.removeChannel(realtimeChannel);realtimeChannel=supabaseClient.channel('community-live').on('postgres_changes',{event:'*',schema:'public',table:'community_notices'},()=>refreshRemoteNotices()).on('postgres_changes',{event:'*',schema:'public',table:'documents'},()=>refreshRemoteDocuments()).on('postgres_changes',{event:'*',schema:'public',table:'community_access_requests'},()=>{if(currentRole==='admin'){refreshAccessRequests();refreshApprovedResidents();}else if(invitationCode)refreshNeighborAccess();}).subscribe();}
 async function openRemoteDocument(path){ const {data,error}=await supabaseClient.storage.from('community-documents').createSignedUrl(path,600); if(error){showToast('No se pudo abrir el documento.'); return;} window.open(data.signedUrl,'_blank','noopener'); }
 function updateAuthButton(){ const button=document.querySelector('#authBtn'); if(!button)return; button.hidden=currentRole==='neighbor'; if(currentRole!=='neighbor') button.textContent=supabaseSession ? 'Salir' : 'Entrar'; }
 async function startNeighborSession(){ if(!supabaseClient)return false; const {data,error}=await supabaseClient.auth.signInAnonymously(); if(error){showToast('No se pudo preparar el acceso seguro del vecino.');return false;} supabaseSession=data.session; updateAuthButton(); return true; }
