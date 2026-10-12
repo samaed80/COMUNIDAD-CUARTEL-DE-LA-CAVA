@@ -42,7 +42,7 @@ async function deleteRemoteDocument(path,id){ if(!supabaseClient || !supabaseSes
 async function refreshRemoteDocuments(){ if(!supabaseClient || !supabaseSession) return false; const {data,error}=await supabaseClient.from('documents').select('*').order('created_at',{ascending:false}); if(error){showToast(`No se pudieron consultar los documentos: ${error.message}`); return false;} remoteDocuments=data||[]; documentSource='remote'; renderDocuments(); return true; }
 async function openRemoteDocument(path){ const {data,error}=await supabaseClient.storage.from('community-documents').createSignedUrl(path,600); if(error){showToast('No se pudo abrir el documento.'); return;} window.open(data.signedUrl,'_blank','noopener'); }
 function updateAuthButton(){ const button=document.querySelector('#authBtn'); if(button) button.textContent=supabaseSession ? 'Salir' : 'Entrar'; }
-async function initSupabase(){ if(!supabaseClient){applyAccessGate();return;} const {data}=await supabaseClient.auth.getSession(); supabaseSession=data.session; updateAuthButton(); if(supabaseSession){await refreshAccessRequests();await refreshApprovedResidents();} if(invitationCode) await checkNeighborAccess(); applyAccessGate(); supabaseClient.auth.onAuthStateChange(async(_event,session)=>{supabaseSession=session; updateAuthButton(); syncDocumentPermissions(); if(session){await refreshAccessRequests();await refreshApprovedResidents();} applyAccessGate();}); }
+async function initSupabase(){ if(!supabaseClient){applyAccessGate();return;} const {data}=await supabaseClient.auth.getSession(); supabaseSession=data.session; updateAuthButton(); if(supabaseSession){await refreshAccessRequests();await refreshApprovedResidents();} if(invitationCode){await checkNeighborAccess();if(!neighborApproved)openModal('registerModal');} applyAccessGate(); supabaseClient.auth.onAuthStateChange(async(_event,session)=>{supabaseSession=session; updateAuthButton(); syncDocumentPermissions(); if(session){await refreshAccessRequests();await refreshApprovedResidents();} applyAccessGate();}); }
 function openModal(id){ document.querySelector('#'+id).hidden=false; }
 function closeModal(id){ document.querySelector('#'+id).hidden=true; }
 function showToast(message){ toast.textContent=message; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2600); }
@@ -135,7 +135,6 @@ if(invitationCode){
   const inviteInput=document.querySelector('#registerForm input[name="invite"]');
   inviteInput.value=invitationCode;
   inviteInput.readOnly=true;
-  window.setTimeout(()=>openModal('registerModal'),350);
 }
 function removePortalReferences(){
   document.querySelector('#profileAddress').textContent=currentRole==='admin'?'1.º F':'Piso pendiente de confirmar';
