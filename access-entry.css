@@ -1,3 +1,5 @@
+.compact-access-modal #registerForm label[hidden]{display:none!important}
+
 .access-choice-card{width:min(560px,100%);padding:34px 30px}
 .access-choice-card h2{margin-bottom:8px}
 .access-choice-card>p{margin-bottom:22px}
