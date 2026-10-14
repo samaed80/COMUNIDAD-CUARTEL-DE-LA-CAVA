@@ -1,0 +1,9 @@
+.access-choice-card{width:min(560px,100%);padding:34px 30px}
+.access-choice-card h2{margin-bottom:8px}
+.access-choice-card>p{margin-bottom:22px}
+.access-choice-list{display:grid;gap:10px;text-align:left}
+.access-choice{display:grid;gap:4px;width:100%;padding:16px 18px;border:1px solid #dfe8e2;border-radius:10px;background:#fff;color:#213a3d;text-align:left;transition:background .2s,border-color .2s,transform .2s}
+.access-choice:hover,.access-choice:focus-visible{background:#e6f1e8;border-color:#a9cfbd;transform:translateY(-1px);outline:none}
+.access-choice strong{font:600 18px var(--serif)}
+.access-choice span{color:#7b8989;font-size:12px;line-height:1.4}
+@media(max-width:560px){.access-choice-card{padding:28px 20px}.access-choice{padding:14px 15px}.access-choice strong{font-size:17px}}
