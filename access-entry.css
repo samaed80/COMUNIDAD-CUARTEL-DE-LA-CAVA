@@ -16,3 +16,6 @@ body:not(.access-ready) .app-shell,body:not(.access-ready) .mobile-nav{visibilit
 .access-choice strong{font:600 18px var(--serif)}
 .access-choice span{color:#7b8989;font-size:12px;line-height:1.4}
 @media(max-width:560px){.access-choice-card{padding:28px 20px}.access-choice{padding:14px 15px}.access-choice strong{font-size:17px}}
+.incident-section-actions{display:flex;gap:8px;align-items:center}
+#incidentHistoryBtn{white-space:nowrap}
+@media(max-width:520px){.incident-section-actions{flex-wrap:wrap;justify-content:flex-end}.incident-section-actions button{padding:9px 10px;font-size:11px}}
