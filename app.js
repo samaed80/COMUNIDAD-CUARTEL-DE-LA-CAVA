@@ -5,7 +5,7 @@ const noticeList = document.querySelector('#noticeList'), incidentList = documen
 let currentRole = new URLSearchParams(window.location.search).get('admin') === '1' ? 'admin' : 'neighbor';
 const storedDocuments = JSON.parse(localStorage.getItem('comunidad-documents') || '[]');
 const supabaseClient = window.supabase && window.SUPABASE_CONFIG ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.publishableKey) : null;
-const incidentEmailWebhook = 'https://script.google.com/macros/s/AKfycbwNmI1JW_O69IGYI-9RI0Upf9je4O-8dm4CczLNaYDI-DUA8cHjj8PQMGYvTniUdzpg1A/exec';
+const incidentEmailWebhook = 'https://script.google.com/macros/s/AKfycbwmE1BWclODrrRQrFqZCHqaHCrbQM7aYZlKHb7KUitw_DC5nGxW-FLnHehS3mEcMwp1HQ/exec';
 let supabaseSession = null;
 let remoteDocuments = [];
 let remoteIncidents = [];
