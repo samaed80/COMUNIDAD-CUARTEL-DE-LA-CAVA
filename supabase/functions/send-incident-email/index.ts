@@ -90,7 +90,7 @@ Deno.serve(async (request) => {
     : "No indicada";
   const reporterSubject = `${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}`;
   const subject = `${reporterSubject} - ${title}`;
-  const body = `INCIDENCIA\n\nVecino: ${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}\nTeléfono: ${reporterPhone}\nUsuario: ${reporterUsername}\n\nTítulo: ${title}\nDescripción: ${description}\nZona o portal: ${location}\nFecha: ${incidentDate}`;
+  const body = `Vecino: ${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}\nTítulo: ${title}\nDescripción: ${description}\nFecha: ${incidentDate}`;
 
   // Reserva atómica: evita que el automático y el botón de tramitación envíen duplicados.
   const { data: claim, error: claimError } = await adminClient
