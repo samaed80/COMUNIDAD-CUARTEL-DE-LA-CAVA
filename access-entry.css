@@ -1,5 +1,12 @@
 .compact-access-modal #registerForm label[hidden]{display:none!important}
 
+body:not(.access-ready) .app-shell,body:not(.access-ready) .mobile-nav{visibility:hidden;pointer-events:none;user-select:none}
+.incident-columns{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.incident-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.incident-actions button{border:0;border-radius:5px;padding:6px 8px;background:var(--mint);color:var(--ink);font-size:10px;font-weight:700}
+.incident-actions button[data-incident-delete]{background:var(--coral-light);color:#b96552}
+@media(max-width:850px){.incident-columns{grid-template-columns:1fr}}
+
 .access-choice-card{width:min(560px,100%);padding:34px 30px}
 .access-choice-card h2{margin-bottom:8px}
 .access-choice-card>p{margin-bottom:22px}
