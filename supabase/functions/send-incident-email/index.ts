@@ -7,10 +7,7 @@ const allowedOrigins = new Set([
 ]);
 
 function response(body: unknown, status: number, origin: string | null) {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    "Vary": "Origin",
-  });
+  const headers = new Headers({ "Content-Type": "application/json", "Vary": "Origin" });
   if (origin && allowedOrigins.has(origin)) {
     headers.set("Access-Control-Allow-Origin", origin);
     headers.set("Access-Control-Allow-Headers", "authorization, apikey, content-type, x-client-info");
@@ -35,61 +32,82 @@ Deno.serve(async (request) => {
     return response({ ok: false, error: "El servicio de correo no está configurado." }, 503, origin);
   }
 
-  const authorization = request.headers.get("Authorization") || "";
-  const accessToken = authorization.replace(/^Bearer\s+/i, "");
+  const accessToken = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
   if (!accessToken) return response({ ok: false, error: "Sesión requerida." }, 401, origin);
-
-  const authClient = createClient(supabaseUrl, anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const authClient = createClient(supabaseUrl, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: authData, error: authError } = await authClient.auth.getUser(accessToken);
-  if (authError || !authData.user?.email) {
-    return response({ ok: false, error: "Sesión no válida." }, 401, origin);
-  }
+  if (authError || !authData.user?.id) return response({ ok: false, error: "Sesión no válida." }, 401, origin);
 
-  const adminClient = createClient(supabaseUrl, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { data: adminEmail, error: adminError } = await adminClient.rpc(
-    "resolve_admin_username",
-    { p_username: "administrador" },
-  );
-  if (adminError || !adminEmail || String(authData.user.email).toLowerCase() !== String(adminEmail).toLowerCase()) {
-    return response({ ok: false, error: "Solo el administrador puede tramitar incidencias." }, 403, origin);
-  }
-
-  let payload: { incident_id?: string; incident?: Record<string, unknown> };
-  try {
-    payload = await request.json();
-  } catch {
-    return response({ ok: false, error: "Solicitud inválida." }, 400, origin);
-  }
+  let payload: { incident_id?: string };
+  try { payload = await request.json(); }
+  catch { return response({ ok: false, error: "Solicitud inválida." }, 400, origin); }
   const incidentId = String(payload.incident_id || "");
-  const incident = payload.incident || {};
-  if (!incidentId || String(incident.id || "") !== incidentId) {
-    return response({ ok: false, error: "Incidencia no válida." }, 400, origin);
-  }
+  if (!incidentId) return response({ ok: false, error: "Incidencia no válida." }, 400, origin);
 
+  const adminClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: savedIncident, error: incidentError } = await adminClient
     .from("community_incident_notifications")
-    .select("id,type,status")
+    .select("id,title,message,location,type,status,created_by,created_at,sent_at,email_status,email_error")
     .eq("id", incidentId)
     .maybeSingle();
-  if (incidentError || !savedIncident) {
-    return response({ ok: false, error: "No se encontró la incidencia." }, 404, origin);
+  if (incidentError || !savedIncident) return response({ ok: false, error: "No se encontró la incidencia." }, 404, origin);
+  if (String(savedIncident.type || "").toLowerCase() !== "incidencia") {
+    return response({ ok: false, error: "El envío de correo solo está disponible para incidencias." }, 409, origin);
   }
-  if (String(savedIncident.type || "").toLowerCase() !== "incidencia" || String(savedIncident.status || "").toLowerCase() !== "pending") {
-    return response({ ok: false, error: "Solo se puede enviar el aviso al tramitar una incidencia pendiente." }, 409, origin);
+  if (String(savedIncident.status || "").toLowerCase() !== "pending") {
+    return response({ ok: false, error: "Solo se pueden enviar incidencias pendientes." }, 409, origin);
+  }
+  if (savedIncident.sent_at || savedIncident.email_status === "sent") {
+    return response({ ok: true, already_sent: true }, 200, origin);
   }
 
-  const reporterName = String(incident.neighbor_name || incident.reporter_name || incident.full_name || incident.username || "Vecino");
-  const reporterPhone = String(incident.neighbor_phone || incident.phone || "No indicado");
-  const reporterFloor = String(incident.neighbor_floor || incident.floor || "No indicado");
-  const reporterUsername = String(incident.neighbor_username || incident.username || "No indicado");
-  const title = String(incident.title || "Incidencia");
-  const message = String(incident.message || incident.text || "");
-  const location = String(incident.location || "No indicada");
-  const body = `Hola, administrador de la Comunidad Cuartel de la Cava:\n\nEl vecino ${reporterName}, teléfono ${reporterPhone}, piso ${reporterFloor} y usuario ${reporterUsername}, comunica una incidencia.\n\nTítulo: ${title}\nMensaje: ${message}\nZona o portal: ${location}\n\nEste mensaje se ha enviado desde la aplicación de la comunidad.`;
+  const { data: adminEmail } = await adminClient.rpc("resolve_admin_username", { p_username: "administrador" });
+  const isAdmin = Boolean(adminEmail && authData.user.email && String(authData.user.email).toLowerCase() === String(adminEmail).toLowerCase());
+  const isCreator = String(savedIncident.created_by || "") === authData.user.id;
+  if (!isAdmin && !isCreator) return response({ ok: false, error: "No tienes permiso para enviar esta incidencia." }, 403, origin);
+  if (!isAdmin) {
+    const { data: settings, error: settingsError } = await adminClient
+      .from("community_settings").select("automatic_incident_email").eq("id", true).maybeSingle();
+    if (settingsError) return response({ ok: false, error: "No se pudo comprobar el ajuste de envío automático." }, 503, origin);
+    if (!settings?.automatic_incident_email) return response({ ok: true, skipped: true }, 200, origin);
+  }
+
+  const { data: resident } = await adminClient
+    .from("community_access_requests")
+    .select("full_name,phone,floor,username")
+    .eq("anonymous_user_id", savedIncident.created_by)
+    .eq("status", "approved")
+    .maybeSingle();
+  const reporterName = String(resident?.full_name || (isAdmin ? "Administrador" : "Vecino"));
+  const reporterPhone = String(resident?.phone || "No indicado");
+  const reporterFloor = String(resident?.floor || "").trim();
+  const reporterUsername = String(resident?.username || "No indicado");
+  const title = String(savedIncident.title || "Incidencia");
+  const description = String(savedIncident.message || "");
+  const location = String(savedIncident.location || "No indicada");
+  const incidentDate = savedIncident.created_at
+    ? new Intl.DateTimeFormat("es-ES", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Madrid" }).format(new Date(savedIncident.created_at))
+    : "No indicada";
+  const reporterSubject = `${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}`;
+  const subject = `${reporterSubject} - ${title}`;
+  const body = `INCIDENCIA\n\nVecino: ${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}\nTeléfono: ${reporterPhone}\nUsuario: ${reporterUsername}\n\nTítulo: ${title}\nDescripción: ${description}\nZona o portal: ${location}\nFecha: ${incidentDate}`;
+
+  // Reserva atómica: evita que el automático y el botón de tramitación envíen duplicados.
+  const { data: claim, error: claimError } = await adminClient
+    .from("community_incident_notifications")
+    .update({ email_status: "sending", email_error: null, recipient_email: "santamariamata@gmail.com" })
+    .eq("id", incidentId)
+    .in("email_status", ["not_sent", "failed"])
+    .is("sent_at", null)
+    .select("id")
+    .maybeSingle();
+  if (claimError || !claim) {
+    const { data: latest } = await adminClient.from("community_incident_notifications")
+      .select("sent_at,email_status").eq("id", incidentId).maybeSingle();
+    if (latest?.sent_at || latest?.email_status === "sent") return response({ ok: true, already_sent: true }, 200, origin);
+    if (latest?.email_status === "sending") return response({ ok: false, error: "El correo ya se está enviando. Espera un momento." }, 409, origin);
+    return response({ ok: false, error: "No se pudo reservar el envío del correo." }, 409, origin);
+  }
 
   try {
     const mailResponse = await fetch(webhookUrl, {
@@ -103,26 +121,31 @@ Deno.serve(async (request) => {
         recipient_email: "santamariamata@gmail.com",
         from: "cuarteldelacava@gmail.com",
         to: "santamariamata@gmail.com",
-        subject: `[Comunidad Cuartel de la Cava] INCIDENCIA de ${reporterName}`,
+        subject,
         title,
         message: body,
         body,
-        incident_message: message,
+        incident_message: description,
         location,
         neighbor_name: reporterName,
         neighbor_phone: reporterPhone,
-        neighbor_floor: reporterFloor,
+        neighbor_floor: reporterFloor || "No indicado",
         neighbor_username: reporterUsername,
         incident_id: incidentId,
         idempotency_key: incidentId,
       }),
     });
     const result = await mailResponse.json().catch(() => null);
-    if (!mailResponse.ok || !result?.ok) {
-      return response({ ok: false, error: "El servicio de correo rechazó la incidencia." }, 502, origin);
-    }
-    return response({ ok: true }, 200, origin);
-  } catch {
-    return response({ ok: false, error: "No se pudo conectar con el servicio de correo." }, 502, origin);
+    if (!mailResponse.ok || !result?.ok) throw new Error("El servicio de correo rechazó la incidencia.");
+    await adminClient.from("community_incident_notifications").update({
+      email_status: "sent", email_error: null, sent_at: new Date().toISOString(), recipient_email: "santamariamata@gmail.com",
+    }).eq("id", incidentId);
+    return response({ ok: true, sent: true }, 200, origin);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "No se pudo conectar con el servicio de correo.";
+    await adminClient.from("community_incident_notifications").update({
+      email_status: "failed", email_error: errorMessage.slice(0, 1000), sent_at: null, recipient_email: null,
+    }).eq("id", incidentId);
+    return response({ ok: false, error: errorMessage }, 502, origin);
   }
 });
