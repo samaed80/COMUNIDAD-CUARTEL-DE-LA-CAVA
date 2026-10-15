@@ -47,7 +47,7 @@ Deno.serve(async (request) => {
   const adminClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: savedIncident, error: incidentError } = await adminClient
     .from("community_incident_notifications")
-    .select("id,title,message,location,type,status,created_by,created_at,sent_at,email_status,email_error")
+    .select("id,title,message,location,type,status,created_by,created_at,updated_at,sent_at,email_status,email_error")
     .eq("id", incidentId)
     .maybeSingle();
   if (incidentError || !savedIncident) return response({ ok: false, error: "No se encontró la incidencia." }, 404, origin);
@@ -59,6 +59,26 @@ Deno.serve(async (request) => {
   }
   if (savedIncident.sent_at || savedIncident.email_status === "sent") {
     return response({ ok: true, already_sent: true }, 200, origin);
+  }
+
+  if (savedIncident.email_status === "sending") {
+    const staleBefore = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { data: recovered, error: recoveryError } = await adminClient
+      .from("community_incident_notifications")
+      .update({
+        email_status: "failed",
+        email_error: "El intento anterior quedó interrumpido; se puede reenviar.",
+        recipient_email: "santamariamata@gmail.com",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", incidentId)
+      .eq("email_status", "sending")
+      .lt("updated_at", staleBefore)
+      .select("id")
+      .maybeSingle();
+    if (recoveryError) console.error("incident-email-recovery", { incidentId, error: recoveryError.message });
+    if (!recovered) return response({ ok: false, error: "El correo ya se está enviando. Espera un momento." }, 409, origin);
+    savedIncident.email_status = "failed";
   }
 
   const { data: adminEmail } = await adminClient.rpc("resolve_admin_username", { p_username: "administrador" });
@@ -95,13 +115,14 @@ Deno.serve(async (request) => {
   // Reserva atómica: evita que el automático y el botón de tramitación envíen duplicados.
   const { data: claim, error: claimError } = await adminClient
     .from("community_incident_notifications")
-    .update({ email_status: "sending", email_error: null, recipient_email: "santamariamata@gmail.com" })
+    .update({ email_status: "sending", email_error: null, recipient_email: "santamariamata@gmail.com", updated_at: new Date().toISOString() })
     .eq("id", incidentId)
     .in("email_status", ["not_sent", "failed"])
     .is("sent_at", null)
     .select("id")
     .maybeSingle();
   if (claimError || !claim) {
+    if (claimError) console.error("incident-email-claim", { incidentId, error: claimError.message });
     const { data: latest } = await adminClient.from("community_incident_notifications")
       .select("sent_at,email_status").eq("id", incidentId).maybeSingle();
     if (latest?.sent_at || latest?.email_status === "sent") return response({ ok: true, already_sent: true }, 200, origin);
@@ -136,16 +157,23 @@ Deno.serve(async (request) => {
       }),
     });
     const result = await mailResponse.json().catch(() => null);
-    if (!mailResponse.ok || !result?.ok) throw new Error("El servicio de correo rechazó la incidencia.");
-    await adminClient.from("community_incident_notifications").update({
+    if (!mailResponse.ok || !result?.ok) throw new Error(String(result?.error || `El servicio de correo rechazó la incidencia (HTTP ${mailResponse.status}).`));
+    const { error: finalizeError } = await adminClient.from("community_incident_notifications").update({
       email_status: "sent", email_error: null, sent_at: new Date().toISOString(), recipient_email: "santamariamata@gmail.com",
     }).eq("id", incidentId);
+    if (finalizeError) {
+      console.error("incident-email-finalize", { incidentId, error: finalizeError.message });
+      return response({ ok: true, sent: true, tracking_warning: "El correo se envió, pero no se pudo actualizar su estado." }, 200, origin);
+    }
     return response({ ok: true, sent: true }, 200, origin);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "No se pudo conectar con el servicio de correo.";
-    await adminClient.from("community_incident_notifications").update({
-      email_status: "failed", email_error: errorMessage.slice(0, 1000), sent_at: null, recipient_email: null,
+    console.error("incident-email-send", { incidentId, error: errorMessage });
+    const { error: failureUpdateError } = await adminClient.from("community_incident_notifications").update({
+      email_status: "failed", email_error: errorMessage.slice(0, 1000), sent_at: null,
+      recipient_email: "santamariamata@gmail.com", updated_at: new Date().toISOString(),
     }).eq("id", incidentId);
+    if (failureUpdateError) console.error("incident-email-failure-state", { incidentId, error: failureUpdateError.message });
     return response({ ok: false, error: errorMessage }, 502, origin);
   }
 });
