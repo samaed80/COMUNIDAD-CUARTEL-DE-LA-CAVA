@@ -38,10 +38,11 @@ Deno.serve(async (request) => {
   const { data: authData, error: authError } = await authClient.auth.getUser(accessToken);
   if (authError || !authData.user?.id) return response({ ok: false, error: "Sesión no válida." }, 401, origin);
 
-  let payload: { incident_id?: string };
+  let payload: { incident_id?: string; manual?: boolean };
   try { payload = await request.json(); }
   catch { return response({ ok: false, error: "Solicitud inválida." }, 400, origin); }
   const incidentId = String(payload.incident_id || "");
+  const manual = payload.manual === true;
   if (!incidentId) return response({ ok: false, error: "Incidencia no válida." }, 400, origin);
 
   const adminClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -85,7 +86,10 @@ Deno.serve(async (request) => {
   const isAdmin = Boolean(adminEmail && authData.user.email && String(authData.user.email).toLowerCase() === String(adminEmail).toLowerCase());
   const isCreator = String(savedIncident.created_by || "") === authData.user.id;
   if (!isAdmin && !isCreator) return response({ ok: false, error: "No tienes permiso para enviar esta incidencia." }, 403, origin);
-  if (!isAdmin) {
+  if (manual && !isAdmin) {
+    return response({ ok: false, error: "Solo el administrador puede enviar manualmente una incidencia." }, 403, origin);
+  }
+  if (!manual) {
     const { data: settings, error: settingsError } = await adminClient
       .from("community_settings").select("automatic_incident_email").eq("id", true).maybeSingle();
     if (settingsError) return response({ ok: false, error: "No se pudo comprobar el ajuste de envío automático." }, 503, origin);
