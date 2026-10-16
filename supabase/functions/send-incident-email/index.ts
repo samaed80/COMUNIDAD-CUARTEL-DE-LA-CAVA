@@ -110,7 +110,17 @@ Deno.serve(async (request) => {
     : "No indicada";
   const reporterSubject = `${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}`;
   const subject = `${reporterSubject} - ${title}`;
-  const body = `Vecino: ${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}\nTítulo: ${title}\nDescripción: ${description}\nFecha: ${incidentDate}`;
+  const body = [
+    "Se ha recibido una nueva incidencia en la Comunidad de Vecinos Cuartel de la Cava.",
+    "",
+    `Vecino que la comunica: ${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}`,
+    `Título: ${title}`,
+    `Descripción: ${description}`,
+    `Zona afectada: ${location}`,
+    `Fecha de comunicación: ${incidentDate}`,
+    "",
+    "La incidencia queda registrada en la aplicación y pendiente de revisión.",
+  ].join("\n");
 
   // Reserva atómica: evita que el automático y el botón de tramitación envíen duplicados.
   const { data: claim, error: claimError } = await adminClient
