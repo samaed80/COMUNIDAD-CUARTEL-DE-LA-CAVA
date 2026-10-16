@@ -20,7 +20,8 @@
 .main-content{isolation:isolate;overflow:visible}
 .main-content:before{display:none}
 .main-content:after{content:"";position:absolute;z-index:-1;inset:0 0 auto;height:355px;background:linear-gradient(180deg,rgba(248,251,247,.14) 0%,rgba(248,251,247,.72) 76%,var(--paper) 100%),url("puente-triana-small.jpg") center 42%/cover no-repeat;opacity:.92;pointer-events:none}
-.topbar{position:sticky;top:0;z-index:3;background:rgba(248,251,247,.94);backdrop-filter:blur(10px);box-shadow:0 1px 0 rgba(23,52,58,.12)}
+.topbar{position:sticky;top:0;z-index:3;background:linear-gradient(180deg,rgba(248,251,247,.18),rgba(248,251,247,.04));border-bottom:1px solid rgba(23,52,58,.12)}
+.top-actions{padding:7px 10px 7px 16px;border:1px solid rgba(159,183,174,.7);border-radius:999px;background:rgba(255,255,255,.62);backdrop-filter:blur(9px);box-shadow:0 6px 18px rgba(23,52,58,.08)}
 .mobile-brand,.top-role{color:var(--navy)}
 .top-role{font-weight:800}
 .icon-btn{color:var(--navy)}
