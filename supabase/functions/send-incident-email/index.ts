@@ -113,7 +113,11 @@ Deno.serve(async (request) => {
   const body = [
     "Se ha recibido una nueva incidencia en la Comunidad de Vecinos Cuartel de la Cava.",
     "",
-    `Vecino que la comunica: ${reporterName}${reporterFloor ? ` (${reporterFloor})` : ""}`,
+    `Datos del vecino:`,
+    `Nombre: ${reporterName}`,
+    `Teléfono: ${reporterPhone}`,
+    `Piso: ${reporterFloor || "No indicado"}`,
+    "",
     `Título: ${title}`,
     `Descripción: ${description}`,
     `Zona afectada: ${location}`,
