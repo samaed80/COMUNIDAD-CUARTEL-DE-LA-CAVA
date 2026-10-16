@@ -15,3 +15,56 @@
 .community-chat-modal form{margin-top:12px}
 .community-chat-modal form label{margin-bottom:8px}
 @media(max-width:600px){.community-chat-modal{max-height:calc(100vh - 20px)}.community-chat-messages{max-height:42vh}.approval-actions .chat-open-btn{width:100%;justify-content:center}}
+
+/* Restauración visual: foto de fondo, avisos legibles y calendario visible. */
+.main-content{isolation:isolate;overflow:visible}
+.main-content:before{display:none}
+.main-content:after{content:"";position:absolute;z-index:-1;inset:0 0 auto;height:355px;background:linear-gradient(180deg,rgba(248,251,247,.14) 0%,rgba(248,251,247,.72) 76%,var(--paper) 100%),url("puente-triana-small.jpg") center 42%/cover no-repeat;opacity:.92;pointer-events:none}
+.topbar{position:sticky;top:0;z-index:3;background:rgba(248,251,247,.94);backdrop-filter:blur(10px);box-shadow:0 1px 0 rgba(23,52,58,.12)}
+.mobile-brand,.top-role{color:var(--navy)}
+.top-role{font-weight:800}
+.icon-btn{color:var(--navy)}
+.secondary-btn.auth-btn{border-color:#9fb7ae;background:#fff;color:var(--navy)}
+.avatar{box-shadow:0 0 0 2px #fff,0 0 0 3px #a9cfbd}
+.welcome{position:relative;min-height:275px;padding-top:64px}
+.welcome h1{max-width:720px;text-shadow:0 1px 0 rgba(255,255,255,.72)}
+.lead{color:#38595a;font-weight:500}
+.permission-note{max-width:560px;margin:7px 0 0;color:#5d716f;font-size:12px;line-height:1.45}
+.notice-list{gap:14px}
+.notice-card{border-color:#c7d7cf;border-radius:8px;padding:18px 20px;box-shadow:0 5px 16px rgba(26,58,52,.07)}
+.notice-date{font-size:11px}
+.notice-date b{font-size:30px;line-height:1}
+.notice-card h3{font-size:15px;color:#17343a}
+.notice-card p{font-size:13px;color:#4f6463;line-height:1.55}
+.notice-tag{font-size:10px}
+.calendar-section{margin-top:58px;border-top:1px solid var(--line);padding-top:30px}
+.calendar-section .section-heading{align-items:center}
+.calendar-controls{display:flex;align-items:center;gap:10px}
+.calendar-controls strong{min-width:130px;text-align:center;font:600 18px var(--serif);color:var(--ink)}
+.calendar-controls .secondary-btn{min-width:36px;padding:8px 10px;font-size:18px;line-height:1}
+.calendar-weekdays,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.calendar-weekdays{margin:20px 0 7px;color:#6e817e;font-size:10px;font-weight:700;text-align:center;text-transform:uppercase}
+.calendar-grid{padding:12px;border:1px solid #cfded6;border-radius:10px;background:rgba(255,255,255,.82);box-shadow:0 5px 16px rgba(26,58,52,.05)}
+.calendar-day{min-height:62px;padding:8px 6px;border:1px solid #e0e9e4;border-radius:6px;background:#fff;color:#45605d;font-size:12px}
+.calendar-number{display:block;font-size:14px;font-weight:700;line-height:1.1;color:var(--ink)}
+.calendar-day b{display:block;font-size:14px;color:var(--ink)}
+.calendar-day small{display:block;margin-top:7px;color:#b75e4b;font-size:9px;line-height:1.2}
+.calendar-day.is-empty{background:transparent;border-color:transparent}
+.calendar-day.is-today{border:2px solid var(--coral);padding:7px 5px}
+.calendar-day.has-event{background:#fff4ee;border-color:#e7b2a5}
+.calendar-events{display:grid;gap:8px;margin-top:16px}
+.calendar-events>.eyebrow{margin:0}
+.calendar-event{display:flex;gap:14px;align-items:baseline;padding:11px 13px;border-left:3px solid var(--coral);background:#fff;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 7px 7px 0}
+.calendar-event strong{min-width:165px;color:#a85443;font-size:12px}
+.calendar-event span{color:var(--ink);font-size:13px;font-weight:600}
+.calendar-events .documents-empty{margin:0;color:#657976;font-size:12px}
+@media(max-width:850px){
+  .main-content:after{height:310px;background:linear-gradient(180deg,rgba(248,251,247,.18) 0%,rgba(248,251,247,.78) 78%,var(--paper) 100%),url("puente-triana-small.jpg") center 42%/cover no-repeat}
+  .welcome{min-height:250px;padding-top:40px}
+  .calendar-grid{gap:4px;padding:8px}
+  .calendar-day{min-height:52px;padding:6px 4px;font-size:11px}
+  .calendar-number{font-size:13px}
+  .calendar-day.is-today{padding:5px 3px}
+  .calendar-event{display:grid;gap:4px}
+  .calendar-event strong{min-width:0}
+}
