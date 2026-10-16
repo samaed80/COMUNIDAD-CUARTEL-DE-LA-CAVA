@@ -72,3 +72,11 @@
 
 /* La portada usa la fotografía real del puente; no mostrar el dibujo SVG. */
 .seville-watermark svg{display:none}
+
+
+/* Perfil compacto: estado y acciones en una sola línea */
+.profile-compact-row{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto;border-top:1px solid var(--line);padding-top:10px;scrollbar-width:none}
+.profile-compact-row::-webkit-scrollbar{display:none}
+.profile-compact-row .profile-line{border:0;padding:0;flex:0 0 auto;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.profile-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.profile-actions .outline-btn{width:auto;margin:0;padding:6px 8px;font-size:10px;line-height:1.2;white-space:nowrap}
