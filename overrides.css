@@ -69,3 +69,6 @@
   .calendar-event{display:grid;gap:4px}
   .calendar-event strong{min-width:0}
 }
+
+/* La portada usa la fotografía real del puente; no mostrar el dibujo SVG. */
+.seville-watermark svg{display:none}
