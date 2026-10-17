@@ -261,7 +261,7 @@ if(requestedProfile === 'vecino' || requestedProfile === 'neighbor' || publicReg
   document.querySelector('#profileAddress').textContent='Piso pendiente de confirmar';
   document.querySelector('#profileStatus').textContent='Cuenta pendiente de verificación';
 }
-function updateRoleSwitcher(){const switcher=document.querySelector('.role-switcher');const canSwitch=Boolean(supabaseSession)&&!supabaseSession.user?.is_anonymous;if(switcher)switcher.hidden=!canSwitch;document.querySelectorAll('.role-choice[data-role="admin"]').forEach(button=>button.hidden=!canSwitch);}
+function updateRoleSwitcher(){const switcher=document.querySelector('.role-switcher');const canSwitch=Boolean(supabaseSession)&&!supabaseSession.user?.is_anonymous;if(switcher){switcher.hidden=!canSwitch;switcher.style.display=canSwitch?'flex':'none';}document.querySelectorAll('.role-choice[data-role="admin"]').forEach(button=>{button.hidden=!canSwitch;button.style.display=canSwitch?'':'none';});}
 function syncDocumentPermissions(){
   const admin=currentRole==='admin' && Boolean(supabaseSession) && !supabaseSession.user?.is_anonymous;
   document.querySelector('#manageDocumentsBtn').hidden=!admin;
