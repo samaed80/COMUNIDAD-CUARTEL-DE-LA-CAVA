@@ -112,3 +112,5 @@
 @media(max-width:850px){.mobile-nav button:first-child,.mobile-nav button:first-child:hover,.mobile-nav button:first-child:focus,.mobile-nav button:first-child:focus-visible,.mobile-nav button:first-child:active{background:transparent!important;border:0!important;border-bottom:0!important;outline:0!important;box-shadow:none!important;text-decoration:none!important;-webkit-tap-highlight-color:transparent!important}.mobile-nav button:first-child:before,.mobile-nav button:first-child:after{display:none!important;content:none!important}}
 
 @media(max-width:850px){.mobile-nav .nav-unread-badge{background:#f3d15b!important;color:#111b17!important;border:1px solid #111b17;box-shadow:none;font-weight:800}}
+
+@media(max-width:850px){.mobile-nav .nav-unread-badge{background:#4f855d!important;color:#fff!important;border:0!important;box-shadow:none}}
