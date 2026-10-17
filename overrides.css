@@ -114,3 +114,14 @@
 @media(max-width:850px){.mobile-nav .nav-unread-badge{background:#f3d15b!important;color:#111b17!important;border:1px solid #111b17;box-shadow:none;font-weight:800}}
 
 @media(max-width:850px){.mobile-nav .nav-unread-badge{background:#4f855d!important;color:#fff!important;border:0!important;box-shadow:none}}
+
+
+/* Incidencia destacada antes de los avisos */
+.quick-actions{margin:0 0 30px;}
+.quick-actions button#quickIncidentBtn{width:100%;display:grid;grid-template-columns:56px minmax(0,1fr);grid-template-rows:auto auto;column-gap:16px;align-items:center;text-align:left;padding:18px 22px;border:2px solid #d9825b;border-radius:16px;background:linear-gradient(135deg,#fff7f2 0%,#fff 100%);color:#1d2c27;box-shadow:0 8px 22px rgba(61,48,35,.09);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;}
+.quick-actions button#quickIncidentBtn:hover{transform:translateY(-1px);border-color:#bb6743;box-shadow:0 11px 26px rgba(61,48,35,.14)}
+.quick-actions button#quickIncidentBtn:focus-visible{outline:3px solid rgba(79,133,93,.35);outline-offset:3px}
+.quick-actions button#quickIncidentBtn .action-icon{grid-row:1 / span 2;display:grid;place-items:center;width:56px;height:56px;border-radius:15px;background:#d9825b;color:#fff;font-size:34px;font-weight:700;line-height:1;}
+.quick-actions button#quickIncidentBtn strong{font-size:18px;line-height:1.25;font-weight:800;}
+.quick-actions button#quickIncidentBtn small{margin-top:4px;font-size:13px;line-height:1.45;color:#53645d;}
+@media(max-width:850px){.quick-actions{margin:0 0 24px}.quick-actions button#quickIncidentBtn{grid-template-columns:50px minmax(0,1fr);column-gap:13px;padding:15px 16px;border-radius:14px}.quick-actions button#quickIncidentBtn .action-icon{width:50px;height:50px;font-size:30px}.quick-actions button#quickIncidentBtn strong{font-size:16px}.quick-actions button#quickIncidentBtn small{font-size:12px}}
