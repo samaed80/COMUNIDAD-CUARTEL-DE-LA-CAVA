@@ -26,6 +26,7 @@ let neighborUnreadCount = 0;
 let previousUnreadTotal = 0;
 let chatNotificationsPrimed = false;
 let noveltyState={chat:0,incidents:0,suggestions:0,documents:0,notices:0};let topNoveltyState={chat:0,incidents:0,suggestions:0,documents:0,notices:0};let lastOpenedNoveltySummary=[];
+try{if(localStorage.getItem('comunidad-notifications-separation-v1')!=='1'){['comunidad-seen-incidents','comunidad-seen-suggestions','comunidad-seen-notices','comunidad-seen-chats','comunidad-seen-documents'].forEach(key=>localStorage.removeItem(key));localStorage.setItem('comunidad-notifications-separation-v1','1');}}catch{}
 const invitationCode = new URLSearchParams(window.location.search).get('invite');
 const adminLoginRequested = new URLSearchParams(window.location.search).get('admin') === '1';
 const neighborLoginRequested = new URLSearchParams(window.location.search).get('entrar') === '1';
