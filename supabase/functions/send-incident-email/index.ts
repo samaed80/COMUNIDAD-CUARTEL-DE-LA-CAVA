@@ -48,7 +48,7 @@ Deno.serve(async (request) => {
   const adminClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: savedIncident, error: incidentError } = await adminClient
     .from("community_incident_notifications")
-    .select("id,title,message,location,type,status,created_by,created_at,updated_at,sent_at,email_status,email_error")
+    .select("id,title,message,location,type,status,created_by,created_at,updated_at,sent_at,email_status,email_error,attachments")
     .eq("id", incidentId)
     .maybeSingle();
   if (incidentError || !savedIncident) return response({ ok: false, error: "No se encontró la incidencia." }, 404, origin);
@@ -148,6 +148,28 @@ Deno.serve(async (request) => {
     return response({ ok: false, error: "No se pudo reservar el envío del correo." }, 409, origin);
   }
 
+  const attachments = [];
+  for (const item of (Array.isArray(savedIncident.attachments) ? savedIncident.attachments : [])) {
+    const path = String(item?.path || '').trim();
+    if (!path) continue;
+    const { data: fileBlob, error: fileError } = await adminClient.storage.from("incident-photos").download(path);
+    if (fileError || !fileBlob) {
+      console.error("incident-photo-download", { incidentId, path, error: fileError?.message || "No se pudo descargar la foto." });
+      continue;
+    }
+    const bytes = new Uint8Array(await fileBlob.arrayBuffer());
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)));
+    }
+    attachments.push({
+      filename: String(item?.name || "foto"),
+      mimeType: String(item?.type || "application/octet-stream"),
+      content: btoa(binary),
+    });
+  }
+
   try {
     const mailResponse = await fetch(webhookUrl, {
       method: "POST",
@@ -172,6 +194,7 @@ Deno.serve(async (request) => {
         neighbor_username: reporterUsername,
         incident_id: incidentId,
         idempotency_key: incidentId,
+        attachments,
       }),
     });
     const result = await mailResponse.json().catch(() => null);
