@@ -26,7 +26,7 @@
       <div class="sidebar-bottom"><span class="role-label">TU PERFIL</span><strong id="roleName">Administrador de la aplicación</strong><p id="roleDescription">Gestionas la información que se publica para toda la comunidad.</p><div class="role-switcher"><button class="role-choice active" data-role="admin">Administrador</button><button class="role-choice" data-role="neighbor">Vecino</button></div><button class="support-link">? Ayuda rápida</button></div>
     </aside>
     <main class="main-content">
-      <header class="topbar"><div class="mobile-brand"><span class="brand-mark">C</span> Comunidad al día</div><div class="top-actions"><span class="top-role" id="topRole">Administrador de la aplicación</span><button class="icon-btn" aria-label="Notificaciones">♢<i></i></button><button class="secondary-btn auth-btn" id="authBtn">Entrar</button><button class="avatar" aria-label="Abrir perfil">ES</button></div></header>
+      <header class="topbar"><div class="mobile-brand"><span class="brand-mark">C</span> Comunidad al día</div><div class="top-actions"><span class="top-role" id="topRole">Administrador de la aplicación</span><button class="icon-btn" id="notificationsBtn" aria-label="Novedades">♢<i></i><span id="notificationBadge" class="notification-badge" hidden>0</span></button><button class="secondary-btn auth-btn" id="authBtn">Entrar</button><button class="avatar" aria-label="Abrir perfil">ES</button></div></header><div id="notificationsPanel" class="notifications-panel" hidden><strong>Novedades</strong><div id="notificationsList"><p class="documents-empty">No hay novedades.</p></div></div>
       <section class="welcome"><div><p class="eyebrow" id="currentDate">FECHA ACTUAL</p><h1>Comunidad de vecinos<br><em>Cuartel de la Cava</em></h1><p class="lead">La información de tu comunidad, ordenada y a mano.</p></div><button class="primary-btn" id="newNoticeBtn">＋ Publicar aviso</button></section>
       <div class="content-grid">
         <section class="main-column" id="avisos"><div class="section-heading"><div><p class="eyebrow">INFORMACIÓN RECIENTE</p><h2>Últimos avisos</h2><p class="permission-note" id="noticePermission">Solo el administrador de la aplicación puede publicar avisos visibles para toda la comunidad.</p></div><button class="plain-link" id="viewAllBtn">Ver todos →</button></div><div class="notice-list" id="noticeList"></div></section>
@@ -53,6 +53,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=1"></script>
-<script src="app.js?v=53"></script>
+<script src="app.js?v=54"></script>
 </body>
 </html>
