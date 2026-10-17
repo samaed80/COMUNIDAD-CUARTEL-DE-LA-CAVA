@@ -154,8 +154,9 @@ Deno.serve(async (request) => {
     if (!path) continue;
     const { data: fileBlob, error: fileError } = await adminClient.storage.from("incident-photos").download(path);
     if (fileError || !fileBlob) {
-      console.error("incident-photo-download", { incidentId, path, error: fileError?.message || "No se pudo descargar la foto." });
-      continue;
+      const message = fileError?.message || "No se pudo descargar la foto.";
+      console.error("incident-photo-download", { incidentId, path, error: message });
+      throw new Error(`No se pudo adjuntar la foto «${String(item?.name || path)}»: ${message}`);
     }
     const bytes = new Uint8Array(await fileBlob.arrayBuffer());
     let binary = "";
@@ -206,7 +207,7 @@ Deno.serve(async (request) => {
       console.error("incident-email-finalize", { incidentId, error: finalizeError.message });
       return response({ ok: true, sent: true, tracking_warning: "El correo se envió, pero no se pudo actualizar su estado." }, 200, origin);
     }
-    return response({ ok: true, sent: true }, 200, origin);
+    return response({ ok: true, sent: true, attachments_sent: attachments.length, attachments_requested: Array.isArray(savedIncident.attachments) ? savedIncident.attachments.length : 0 }, 200, origin);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "No se pudo conectar con el servicio de correo.";
     console.error("incident-email-send", { incidentId, error: errorMessage });
