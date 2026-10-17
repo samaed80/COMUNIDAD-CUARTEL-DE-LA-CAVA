@@ -104,3 +104,5 @@
 .mobile-nav{background:#c8755d;border-top:2px solid #202b25;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:1fr;padding:8px 10px 9px;gap:4px}.mobile-nav button:nth-child(-n+5){grid-column:auto;grid-row:auto}.mobile-nav button{min-height:48px;color:#fff;font-size:24px}.mobile-nav button small{color:#fff}.mobile-nav button.selected{background:#fff;color:#b45f4c}.mobile-nav button.selected small{color:#b45f4c}@media(max-width:390px){.mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:1fr;padding:7px 5px 8px}.mobile-nav button{min-height:44px;font-size:21px}.mobile-nav button small{font-size:7px}}
 
 .mobile-nav button.selected{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;border-bottom:2px solid #fff}.mobile-nav button.selected small{color:#fff}
+
+.mobile-nav button:first-child.selected,.mobile-nav button:first-child.selected:hover,.mobile-nav button:first-child.selected:active{background:transparent!important;color:#fff!important;box-shadow:none!important;border:0;border-bottom:2px solid #fff!important}.mobile-nav button:first-child.selected small{color:#fff!important}
