@@ -1,6 +1,6 @@
 const APP_VERSION='96';
 const requestedAppVersion=new URLSearchParams(window.location.search).get('v');
-if(requestedAppVersion && [APP_VERSION].includes(requestedAppVersion)){const latestUrl=new URL(window.location.href);latestUrl.searchParams.set('v',APP_VERSION);window.location.replace(latestUrl.toString());}
+if(requestedAppVersion && ![APP_VERSION].includes(requestedAppVersion)){const latestUrl=new URL(window.location.href);latestUrl.searchParams.set('v',APP_VERSION);window.location.replace(latestUrl.toString());}
 const notices = [];
 const incidents = [];
 let incidentPhotoFiles = [];
