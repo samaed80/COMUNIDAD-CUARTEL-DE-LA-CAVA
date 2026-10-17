@@ -78,11 +78,18 @@ async function openIncidentPhotos(incidentId){
   const errors=[];
   for(const rawPhoto of attachments){
     const photo=typeof rawPhoto==='string'?{path:rawPhoto,name:rawPhoto.split('/').pop()}:rawPhoto||{};
-    const path=String(photo.path||photo.storage_path||photo.file_path||photo.url||'').trim();
-    if(!path){errors.push('Foto sin ruta');continue;}
-    const {data,error}=await supabaseClient.storage.from('incident-photos').createSignedUrl(path,600);
-    if(error||!data?.signedUrl){errors.push(`${photo.name||'Foto'}: ${error?.message||'no se pudo abrir'}`);continue;}
-    const safeUrl=escapeHtml(data.signedUrl);
+    const path=String(photo.path||photo.storage_path||photo.file_path||'').trim();
+    const directUrl=String(photo.url||'').trim();
+    if(!path&&!directUrl){errors.push('Foto sin ruta');continue;}
+    let signedUrl=directUrl;
+    let error=null;
+    if(!signedUrl){
+      const result=await supabaseClient.storage.from('incident-photos').createSignedUrl(path,600);
+      signedUrl=result.data?.signedUrl||'';
+      error=result.error;
+    }
+    if(!signedUrl){errors.push(`${photo.name||'Foto'}: ${error?.message||'no se pudo abrir'}`);continue;}
+    const safeUrl=escapeHtml(signedUrl);
     const safeName=escapeHtml(photo.name||path.split('/').pop()||'Foto');
     previews.push(`<figure class="incident-photo-preview"><a href="${safeUrl}" target="_blank" rel="noopener"><img src="${safeUrl}" alt="${safeName}" loading="lazy"></a><figcaption>${safeName}</figcaption></figure>`);
   }
