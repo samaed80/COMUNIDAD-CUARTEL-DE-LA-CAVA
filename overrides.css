@@ -106,3 +106,5 @@
 .mobile-nav button.selected{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;border-bottom:2px solid #fff}.mobile-nav button.selected small{color:#fff}
 
 .mobile-nav button:first-child.selected,.mobile-nav button:first-child.selected:hover,.mobile-nav button:first-child.selected:active{background:transparent!important;color:#fff!important;box-shadow:none!important;border:0;border-bottom:2px solid #fff!important}.mobile-nav button:first-child.selected small{color:#fff!important}
+
+.mobile-nav button,.mobile-nav button:hover,.mobile-nav button:active,.mobile-nav button.selected,.mobile-nav button.selected:hover,.mobile-nav button.selected:active{background:transparent!important;color:#fff!important;border:0!important;border-radius:0!important;box-shadow:none!important;outline:0!important}.mobile-nav button small,.mobile-nav button.selected small{color:#fff!important}
