@@ -125,3 +125,6 @@
 .quick-actions button#quickIncidentBtn strong{font-size:18px;line-height:1.25;font-weight:800;}
 .quick-actions button#quickIncidentBtn small{margin-top:4px;font-size:13px;line-height:1.45;color:#53645d;}
 @media(max-width:850px){.quick-actions{margin:0 0 24px}.quick-actions button#quickIncidentBtn{grid-template-columns:50px minmax(0,1fr);column-gap:13px;padding:15px 16px;border-radius:14px}.quick-actions button#quickIncidentBtn .action-icon{width:50px;height:50px;font-size:30px}.quick-actions button#quickIncidentBtn strong{font-size:16px}.quick-actions button#quickIncidentBtn small{font-size:12px}}
+
+
+@media(max-width:850px){.mobile-nav:has(#mobileRequestsNav:not([hidden])){grid-template-columns:repeat(6,minmax(0,1fr));}.mobile-nav:has(#mobileRequestsNav:not([hidden])) #mobileRequestsNav small{font-size:8px;}}
