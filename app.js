@@ -1,3 +1,6 @@
+const APP_VERSION='94', BASELINE_VERSION='88';
+const requestedAppVersion=new URLSearchParams(window.location.search).get('v');
+if(requestedAppVersion && ![APP_VERSION,BASELINE_VERSION].includes(requestedAppVersion)){const latestUrl=new URL(window.location.href);latestUrl.searchParams.set('v',APP_VERSION);window.location.replace(latestUrl.toString());}
 const notices = [];
 const incidents = [];
 let incidentPhotoFiles = [];
