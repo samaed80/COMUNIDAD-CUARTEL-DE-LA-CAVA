@@ -609,7 +609,7 @@
 @media(min-width:851px){
   .app-shell{display:block!important;min-height:100vh}
   .sidebar{display:none!important}
-  .main-content{max-width:1320px;padding-bottom:120px}
+  .main-content{max-width:none;padding:0 clamp(28px,4vw,64px) 120px;border-left:8px solid var(--green);border-right:8px solid var(--green);min-height:100vh}
   .mobile-nav{display:flex!important;align-items:stretch!important;justify-content:center!important;gap:0!important;padding:7px 18px 9px!important}
   .mobile-nav button{flex:0 1 150px!important;width:auto!important;padding:0 16px!important}
 }
