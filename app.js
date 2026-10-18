@@ -29,6 +29,7 @@ let neighborUnreadCount = 0;
 let requestUnreadCount = 0;
 let previousUnreadTotal = 0;
 let chatNotificationsPrimed = false;
+let pushSubscription = null;
 let noveltyState={chat:0,incidents:0,suggestions:0,documents:0,notices:0,requests:0};let topNoveltyState={chat:0,incidents:0,suggestions:0,documents:0,notices:0,requests:0};let lastOpenedNoveltySummary=[];
 try{if(localStorage.getItem('comunidad-notifications-separation-v1')!=='1'){['comunidad-seen-incidents','comunidad-seen-suggestions','comunidad-seen-notices','comunidad-seen-chats','comunidad-seen-documents'].forEach(key=>localStorage.removeItem(key));localStorage.setItem('comunidad-notifications-separation-v1','1');}}catch{}
 const invitationCode = new URLSearchParams(window.location.search).get('invite');
@@ -170,11 +171,15 @@ async function initSupabase(){ if(!supabaseClient){applyAccessGate();if(adminLog
 function openModal(id){ document.querySelector('#'+id).hidden=false; }
 function closeModal(id){ document.querySelector('#'+id).hidden=true;if(id==='communityChatModal'&&chatPollHandle){clearInterval(chatPollHandle);chatPollHandle=null;chatRequestId=null;} }
 function showToast(message){ toast.textContent=message; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2600); }
+function urlBase64ToUint8Array(value){const padding='='.repeat((4-value.length%4)%4),base64=(value+padding).replace(/-/g,'+').replace(/_/g,'/');return Uint8Array.from(atob(base64),char=>char.charCodeAt(0));}
+async function updatePushButton(){const button=document.querySelector('#enableNotificationsBtn');if(!button)return;if(!('Notification' in window)||!('serviceWorker' in navigator)||!window.SUPABASE_CONFIG?.vapidPublicKey){button.hidden=true;return;}try{const registration=await navigator.serviceWorker.ready;pushSubscription=await registration.pushManager.getSubscription();button.textContent=pushSubscription?'Notificaciones activadas':'Activar notificaciones';button.classList.toggle('is-active',Boolean(pushSubscription));}catch{button.textContent='Activar notificaciones';}}
+async function enablePushNotifications(){const button=document.querySelector('#enableNotificationsBtn');if(!supabaseClient||!supabaseSession){showToast('Inicia sesión para activar las notificaciones.');return;}if(!('Notification' in window)||!('serviceWorker' in navigator)||!window.SUPABASE_CONFIG?.vapidPublicKey){showToast('Este navegador no permite notificaciones web.');return;}try{const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();if(permission!=='granted'){showToast('No se han permitido las notificaciones.');return;}const registration=await navigator.serviceWorker.ready;pushSubscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(window.SUPABASE_CONFIG.vapidPublicKey)});const json=pushSubscription.toJSON();const {error}=await supabaseClient.rpc('save_push_subscription',{p_endpoint:json.endpoint,p_p256dh:json.keys?.p256dh||'',p_auth:json.keys?.auth||''});if(error)throw error;button.textContent='Notificaciones activadas';button.classList.add('is-active');showToast('Notificaciones activadas en este dispositivo.');}catch(error){showToast(`No se pudieron activar las notificaciones: ${error.message||'comprueba los permisos del navegador.'}`);}}
 document.querySelector('#newNoticeBtn').onclick=()=>{const dateInput=document.querySelector('#noticeForm input[name="date"]');if(dateInput&&!dateInput.value)dateInput.value=new Date().toISOString().slice(0,10);openModal('noticeModal');};
 document.querySelector('#newIncidentBtn').onclick=()=>openModal('incidentModal');
 document.querySelector('#newIncidentBtn').hidden=true;
 document.querySelector('#quickIncidentBtn').onclick=()=>openModal('incidentModal');
 document.querySelector('#profileBtn').onclick=()=> currentRole==='admin' ? showToast('Perfil de Eduardo Santamaría · administrador de la aplicación.') : showNeighborProfile();
+document.querySelector('#enableNotificationsBtn')?.addEventListener('click',enablePushNotifications);
 document.querySelector('#openNeighborChatBtn').onclick=openNeighborCommunityChat;
 document.querySelector('#registerForm').addEventListener('submit',()=>setTimeout(()=>{if(currentRole==='neighbor'&&neighborApproved)refreshNeighborProfile();},1200));
 document.querySelector('#viewAllBtn').onclick=()=>showToast('Aquí aparecerá el historial completo de avisos.');
@@ -318,7 +323,7 @@ function removePortalReferences(){
   const incidentTitle=document.querySelector('#incidentForm input[name="title"]');
   if(incidentTitle)incidentTitle.placeholder='Por ejemplo: luz fundida en las zonas comunes';
 }
-renderCurrentDate(); renderNotices(); renderCalendar(); renderIncidents(); removePortalReferences(); syncDocumentPermissions(); initSupabase().then(()=>{refreshChatNotifications(false);setInterval(()=>{refreshChatNotifications(true);refreshNoveltyNotifications();},12000);});
+renderCurrentDate(); renderNotices(); renderCalendar(); renderIncidents(); removePortalReferences(); syncDocumentPermissions(); updatePushButton(); initSupabase().then(()=>{updatePushButton();refreshChatNotifications(false);setInterval(()=>{refreshChatNotifications(true);refreshNoveltyNotifications();},12000);});
 
 
 // Instalación y compartir la aplicación.
