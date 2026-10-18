@@ -331,6 +331,7 @@ const installQr=document.querySelector('#installQr');
 const installTitle=document.querySelector('#installTitle');
 const installInstructions=document.querySelector('#installInstructions');
 const installQrWrap=document.querySelector('.install-qr-wrap');
+const shareLinkField=document.querySelector('#shareLinkField');
 const copyShareLinkBtn=document.querySelector('#copyShareLinkBtn');
 const appShareUrl=window.location.origin+window.location.pathname;
 function drawInstallQr(){
@@ -342,7 +343,8 @@ function openInstallModal(){
   if(installTitle)installTitle.textContent='Instalar Cuartel de la Cava';
   if(installInstructions)installInstructions.textContent='En Android, pulsa “Instalar app” si aparece. En iPhone, abre este enlace en Safari y usa Compartir → Añadir a pantalla de inicio.';
   if(installQrWrap)installQrWrap.hidden=false;
-  if(copyShareLinkBtn)copyShareLinkBtn.textContent='Copiar enlace';
+  if(shareLinkField)shareLinkField.hidden=true;
+  if(copyShareLinkBtn)copyShareLinkBtn.hidden=true;
   if(installModal)installModal.hidden=false;
 }
 function openShareModal(){
@@ -350,7 +352,8 @@ function openShareModal(){
   if(installTitle)installTitle.textContent='Compartir enlace';
   if(installInstructions)installInstructions.textContent='Comparte este enlace con los vecinos para que puedan entrar en la comunidad.';
   if(installQrWrap)installQrWrap.hidden=true;
-  if(copyShareLinkBtn)copyShareLinkBtn.textContent='Copiar enlace';
+  if(shareLinkField)shareLinkField.hidden=false;
+  if(copyShareLinkBtn){copyShareLinkBtn.hidden=false;copyShareLinkBtn.textContent='Copiar enlace';}
   if(installModal)installModal.hidden=false;
 }
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;if(installAppBtn)installAppBtn.hidden=false;});
