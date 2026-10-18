@@ -341,8 +341,17 @@ function drawInstallQr(){
 function openInstallModal(){
   drawInstallQr();
   if(installTitle)installTitle.textContent='Instalar Cuartel de la Cava';
-  if(installInstructions)installInstructions.textContent='En Android, pulsa “Instalar app” si aparece. En iPhone, abre este enlace en Safari y usa Compartir → Añadir a pantalla de inicio.';
-  if(installQrWrap)installQrWrap.hidden=false;
+  const userAgent=navigator.userAgent||'';
+  const isIos=/iPhone|iPad|iPod/i.test(userAgent);
+  const isAndroid=/Android/i.test(userAgent);
+  if(installInstructions){
+    installInstructions.innerHTML=isIos
+      ? '<strong>En iPhone o iPad</strong><br>1. Abre este enlace en Safari.<br>2. Pulsa Compartir.<br>3. Elige “Añadir a pantalla de inicio”.<br><br>No necesitas descargar nada ni usar la App Store.'
+      : isAndroid
+        ? '<strong>En Android</strong><br>1. Abre este enlace en Chrome.<br>2. Pulsa “Instalar app” o el menú ⋮ → “Instalar app”.<br>3. Confirma la instalación.<br><br>La aplicación se añade a la pantalla de inicio sin pasar por Google Play.'
+        : '<strong>En ordenador</strong><br>Usa el icono de instalación de la barra de direcciones o el menú del navegador → “Instalar Cuartel de la Cava”.<br><br>Es una aplicación web instalable; no requiere descargar un ejecutable.';
+  }
+  if(installQrWrap)installQrWrap.hidden=true;
   if(shareLinkField)shareLinkField.hidden=true;
   if(copyShareLinkBtn)copyShareLinkBtn.hidden=true;
   if(installModal)installModal.hidden=false;
