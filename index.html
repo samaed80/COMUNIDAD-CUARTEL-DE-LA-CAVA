@@ -11,7 +11,12 @@
 <link rel="stylesheet" href="overrides.css?v=30" />
 <link rel="stylesheet" href="access-entry.css?v=5" />
 <style id="final-mobile-nav-fix">@media(max-width:850px){.mobile-nav button,.mobile-nav button:hover,.mobile-nav button:focus,.mobile-nav button:active,.mobile-nav button.selected,.mobile-nav button.selected:hover,.mobile-nav button.selected:focus,.mobile-nav button.selected:active{background:transparent!important;background-color:transparent!important;color:#fff!important;border:0!important;border-bottom:0!important;border-radius:0!important;box-shadow:none!important;outline:0!important;background-image:none!important;text-decoration:none!important}.mobile-nav button small,.mobile-nav button.selected small{color:#fff!important}}</style>
-<style id="mobile-nav-width-fix">@media(max-width:850px){.main-content{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}.mobile-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:1000!important;width:100%;box-sizing:border-box;gap:0;padding:8px 4px calc(9px + env(safe-area-inset-bottom,0px));overflow-x:hidden}.mobile-nav button{min-width:0;padding-left:2px;padding-right:2px}.mobile-nav button small{font-size:clamp(6px,2.4vw,9px);white-space:nowrap;letter-spacing:-.02em}}</style>
+<style id="mobile-nav-width-fix">
+/* La barra permanece anclada al viewport en todos los tamaños de pantalla. */
+.main-content{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+.mobile-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:3!important;width:100%;box-sizing:border-box;gap:0;padding:8px 4px calc(9px + env(safe-area-inset-bottom,0px));overflow-x:hidden}
+@media(max-width:850px){.mobile-nav button{min-width:0;padding-left:2px;padding-right:2px}.mobile-nav button small{font-size:clamp(6px,2.4vw,9px);white-space:nowrap;letter-spacing:-.02em}}
+</style>
 </head>
 <body>
   <div class="app-shell">
