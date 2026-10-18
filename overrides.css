@@ -613,3 +613,23 @@
   .mobile-nav{display:flex!important;align-items:stretch!important;justify-content:center!important;gap:0!important;padding:7px 18px 9px!important}
   .mobile-nav button{flex:0 1 150px!important;width:auto!important;padding:0 16px!important}
 }
+/* Incidencia compacta en portada y formulario cómodo en móvil. */
+.quick-actions{align-items:start}
+.quick-actions > .resident-card{height:auto}
+.quick-actions button#quickIncidentBtn{height:auto;min-height:0;padding:12px 16px;grid-template-columns:42px minmax(0,1fr);column-gap:12px;border-radius:11px}
+.quick-actions button#quickIncidentBtn .action-icon{width:42px;height:42px;border-radius:11px;font-size:25px}
+.quick-actions button#quickIncidentBtn strong{font-size:15px}
+.quick-actions button#quickIncidentBtn small{font-size:11px;line-height:1.35}
+@media(max-width:700px){
+  #incidentModal{padding:10px}
+  #incidentModal .modal{max-height:calc(100vh - 20px);overflow-y:auto;padding:19px 17px}
+  #incidentModal .modal h2{font-size:28px;margin-top:6px}
+  #incidentModal .modal-intro{font-size:11px;line-height:1.4;margin-bottom:11px}
+  #incidentModal .modal label{margin:9px 0;font-size:10px}
+  #incidentModal .modal input,
+  #incidentModal .modal textarea,
+  #incidentModal .modal select{padding:8px 9px;margin-top:4px;font-size:12px}
+  #incidentModal .modal textarea{min-height:68px;max-height:92px}
+  #incidentModal .modal-actions{position:sticky;bottom:-19px;margin:13px -17px -19px;padding:10px 17px 19px;background:var(--paper);z-index:2}
+  #incidentModal .modal-actions button{padding:9px 11px;font-size:11px}
+}
