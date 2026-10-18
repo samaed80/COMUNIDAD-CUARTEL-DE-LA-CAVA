@@ -405,3 +405,38 @@
 #requestUnreadCount[hidden]{
   display:none!important;
 }
+
+
+/* Formato único: círculo verde con número blanco. */
+.mobile-nav .nav-unread-badge,
+.side-nav .nav-unread-badge,
+#notificationBadge,
+#noticeUnreadCount,
+#incidentUnreadCount,
+#suggestionUnreadCount,
+#requestUnreadCount{
+  display:inline-grid!important;
+  place-items:center!important;
+  width:18px!important;
+  height:18px!important;
+  min-width:18px!important;
+  min-height:18px!important;
+  padding:0!important;
+  border-radius:50%!important;
+  background:#4f855d!important;
+  color:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+  font:700 9px var(--sans)!important;
+  line-height:18px!important;
+  text-align:center!important;
+}
+.mobile-nav .nav-unread-badge[hidden],
+.side-nav .nav-unread-badge[hidden],
+#notificationBadge[hidden],
+#noticeUnreadCount[hidden],
+#incidentUnreadCount[hidden],
+#suggestionUnreadCount[hidden],
+#requestUnreadCount[hidden]{
+  display:none!important;
+}
