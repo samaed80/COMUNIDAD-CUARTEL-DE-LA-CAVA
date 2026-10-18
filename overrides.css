@@ -362,3 +362,15 @@
   width:100%;
   margin-top:8px;
 }
+
+
+/* Ocultar contadores de novedades en la navegación y en los encabezados. */
+.mobile-nav .nav-unread-badge,
+.side-nav .nav-unread-badge,
+#notificationBadge,
+#noticeUnreadCount,
+#incidentUnreadCount,
+#suggestionUnreadCount,
+#requestUnreadCount{
+  display:none!important;
+}
