@@ -29,6 +29,7 @@ let neighborUnreadCount = 0;
 let requestUnreadCount = 0;
 let previousUnreadTotal = 0;
 let chatNotificationsPrimed = false;
+let pushSubscription = null;
 let noveltyState={chat:0,incidents:0,suggestions:0,documents:0,notices:0,requests:0};let topNoveltyState={chat:0,incidents:0,suggestions:0,documents:0,notices:0,requests:0};let lastOpenedNoveltySummary=[];
 try{if(localStorage.getItem('comunidad-notifications-separation-v1')!=='1'){['comunidad-seen-incidents','comunidad-seen-suggestions','comunidad-seen-notices','comunidad-seen-chats','comunidad-seen-documents'].forEach(key=>localStorage.removeItem(key));localStorage.setItem('comunidad-notifications-separation-v1','1');}}catch{}
 const invitationCode = new URLSearchParams(window.location.search).get('invite');
@@ -170,11 +171,15 @@ async function initSupabase(){ if(!supabaseClient){applyAccessGate();if(adminLog
 function openModal(id){ document.querySelector('#'+id).hidden=false; }
 function closeModal(id){ document.querySelector('#'+id).hidden=true;if(id==='communityChatModal'&&chatPollHandle){clearInterval(chatPollHandle);chatPollHandle=null;chatRequestId=null;} }
 function showToast(message){ toast.textContent=message; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2600); }
+function urlBase64ToUint8Array(value){const padding='='.repeat((4-value.length%4)%4),base64=(value+padding).replace(/-/g,'+').replace(/_/g,'/');return Uint8Array.from(atob(base64),char=>char.charCodeAt(0));}
+async function updatePushButton(){const button=document.querySelector('#enableNotificationsBtn');if(!button)return;if(!('Notification' in window)||!('serviceWorker' in navigator)||!window.SUPABASE_CONFIG?.vapidPublicKey){button.hidden=true;return;}try{const registration=await navigator.serviceWorker.ready;pushSubscription=await registration.pushManager.getSubscription();button.textContent=pushSubscription?'Notificaciones activadas':'Activar notificaciones';button.classList.toggle('is-active',Boolean(pushSubscription));}catch{button.textContent='Activar notificaciones';}}
+async function enablePushNotifications(){const button=document.querySelector('#enableNotificationsBtn');if(!supabaseClient||!supabaseSession){showToast('Inicia sesión para activar las notificaciones.');return;}if(!('Notification' in window)||!('serviceWorker' in navigator)||!window.SUPABASE_CONFIG?.vapidPublicKey){showToast('Este navegador no permite notificaciones web.');return;}try{const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();if(permission!=='granted'){showToast('No se han permitido las notificaciones.');return;}const registration=await navigator.serviceWorker.ready;pushSubscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(window.SUPABASE_CONFIG.vapidPublicKey)});const json=pushSubscription.toJSON();const {error}=await supabaseClient.rpc('save_push_subscription',{p_endpoint:json.endpoint,p_p256dh:json.keys?.p256dh||'',p_auth:json.keys?.auth||''});if(error)throw error;button.textContent='Notificaciones activadas';button.classList.add('is-active');showToast('Notificaciones activadas en este dispositivo.');}catch(error){showToast(`No se pudieron activar las notificaciones: ${error.message||'comprueba los permisos del navegador.'}`);}}
 document.querySelector('#newNoticeBtn').onclick=()=>{const dateInput=document.querySelector('#noticeForm input[name="date"]');if(dateInput&&!dateInput.value)dateInput.value=new Date().toISOString().slice(0,10);openModal('noticeModal');};
 document.querySelector('#newIncidentBtn').onclick=()=>openModal('incidentModal');
 document.querySelector('#newIncidentBtn').hidden=true;
 document.querySelector('#quickIncidentBtn').onclick=()=>openModal('incidentModal');
 document.querySelector('#profileBtn').onclick=()=> currentRole==='admin' ? showToast('Perfil de Eduardo Santamaría · administrador de la aplicación.') : showNeighborProfile();
+document.querySelector('#enableNotificationsBtn')?.addEventListener('click',enablePushNotifications);
 document.querySelector('#openNeighborChatBtn').onclick=openNeighborCommunityChat;
 document.querySelector('#registerForm').addEventListener('submit',()=>setTimeout(()=>{if(currentRole==='neighbor'&&neighborApproved)refreshNeighborProfile();},1200));
 document.querySelector('#viewAllBtn').onclick=()=>showToast('Aquí aparecerá el historial completo de avisos.');
@@ -235,7 +240,8 @@ document.querySelector('#accessGateAction').onclick=()=>window.location.href=`${
 document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>closeModal(button.dataset.close));
 document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.onclick=e=>{if(e.target===backdrop)closeModal(backdrop.id)});
 function navigateToSection(section){const chatTarget=section==='chat'?'solicitudes':section;document.querySelectorAll('[data-section]').forEach(item=>{const active=item.dataset.section===section;item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});if(section==='chat'&&currentRole==='neighbor'){openNeighborCommunityChat();return;}const target=section==='inicio'?document.querySelector('.welcome'):document.getElementById(chatTarget);if(!target)return;const topbar=document.querySelector('.topbar');const offset=(topbar?.getBoundingClientRect().height||0)+12;const top=Math.max(0,target.getBoundingClientRect().top+window.scrollY-offset);window.scrollTo({top,behavior:'smooth'});}
-document.querySelectorAll('[data-section]').forEach(button=>button.addEventListener('click',()=>navigateToSection(button.dataset.section)));document.querySelectorAll('[data-mark-section]').forEach(button=>button.onclick=()=>markNotificationSectionAsRead(button.dataset.markSection));
+document.querySelectorAll('[data-mark-section]').forEach(button=>button.onclick=()=>markNotificationSectionAsRead(button.dataset.markSection));
+document.querySelectorAll('.mobile-nav [data-section],.side-nav [data-section]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();navigateToSection(button.dataset.section);}));
 document.querySelector('#registerForm').onsubmit=async e=>{e.preventDefault(); const form=e.currentTarget; const data=new FormData(form); if(!supabaseClient){showToast('La aplicación no está conectada.');return;} if(!supabaseSession&&!(await startNeighborSession()))return; const password=String(data.get('password')||'').trim(),username=String(data.get('username')||'').trim().toLowerCase(),invite=String(data.get('invite')||invitationCode||'').trim(),phone=String(data.get('phone')||'').trim(); if(password.length<6){showToast('La contraseña debe tener al menos 6 caracteres.');return;} if(neighborInviteState==='approved'){const {data:ok,error}=await supabaseClient.rpc('login_neighbor_account',{p_username:username,p_password:password});if(error||!ok){showToast(error?.message||'El usuario o la contraseña no coinciden.');return;}neighborApproved=true;updateAuthButton();closeModal('registerModal');form.reset();await refreshNeighborProfile();await refreshRemoteDocuments();await refreshRemoteNotices();applyAccessGate();updateChatAccessButtons();await refreshChatNotifications(false);showToast('Sesión iniciada.');return;} let error; if(invite){({error}=await supabaseClient.rpc('claim_neighbor_access_request',{p_invitation_code:invite,p_full_name:String(data.get('name')||'').trim(),p_floor:String(data.get('floor')||'').trim(),p_username:username,p_password:password}));}else{({error}=await supabaseClient.rpc('register_neighbor_account',{p_username:username,p_full_name:String(data.get('name')||'').trim(),p_phone:phone,p_floor:String(data.get('floor')||'').trim(),p_password:password}));}if(error){showToast(`No se pudo enviar la solicitud: ${error.message}`);return;}neighborRequestSent=true;closeModal('registerModal');form.reset();applyAccessGate();showToast('Solicitud enviada. El administrador revisará tus datos.');};
 document.querySelector('#noticeForm').onsubmit=async e=>{e.preventDefault(); const form=e.currentTarget; const data=new FormData(form); if(!supabaseSession||currentRole!=='admin'){showToast('Inicia sesión como administrador para publicar avisos.');return;} const {error}=await supabaseClient.from('community_notices').insert({title:String(data.get('title')).trim(),message:String(data.get('message')).trim(),event_date:data.get('date'),tag:'Nuevo',created_by:supabaseSession.user.id});if(error){showToast(`No se pudo publicar el aviso: ${error.message}`);return;}await refreshRemoteNotices();closeModal('noticeModal');form.reset();showToast('Aviso publicado para toda la comunidad.');};
 document.querySelector('#prevMonthBtn').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);renderCalendar();};
@@ -318,7 +324,7 @@ function removePortalReferences(){
   const incidentTitle=document.querySelector('#incidentForm input[name="title"]');
   if(incidentTitle)incidentTitle.placeholder='Por ejemplo: luz fundida en las zonas comunes';
 }
-renderCurrentDate(); renderNotices(); renderCalendar(); renderIncidents(); removePortalReferences(); syncDocumentPermissions(); initSupabase().then(()=>{refreshChatNotifications(false);setInterval(()=>{refreshChatNotifications(true);refreshNoveltyNotifications();},12000);});
+renderCurrentDate(); renderNotices(); renderCalendar(); renderIncidents(); removePortalReferences(); syncDocumentPermissions(); updatePushButton(); initSupabase().then(()=>{updatePushButton();refreshChatNotifications(false);setInterval(()=>{refreshChatNotifications(true);refreshNoveltyNotifications();},12000);});
 
 
 // Instalación y compartir la aplicación.
@@ -328,14 +334,45 @@ const shareAppBtn=document.querySelector('#shareAppBtn');
 const installModal=document.querySelector('#installModal');
 const shareAppLink=document.querySelector('#shareAppLink');
 const installQr=document.querySelector('#installQr');
+const installTitle=document.querySelector('#installTitle');
+const installInstructions=document.querySelector('#installInstructions');
+const installQrWrap=document.querySelector('.install-qr-wrap');
+const shareLinkField=document.querySelector('#shareLinkField');
+const copyShareLinkBtn=document.querySelector('#copyShareLinkBtn');
 const appShareUrl=window.location.origin+window.location.pathname;
 function drawInstallQr(){
   if(shareAppLink) shareAppLink.value=appShareUrl;
   if(installQr&&window.QRCode) QRCode.toCanvas(installQr,appShareUrl,{width:220,margin:2,color:{dark:'#17343a',light:'#ffffff'}},()=>{});
 }
-function openInstallModal(){drawInstallQr();if(installModal)installModal.hidden=false;}
+function openInstallModal(){
+  drawInstallQr();
+  if(installTitle)installTitle.textContent='Instalar Cuartel de la Cava';
+  const userAgent=navigator.userAgent||'';
+  const isIos=/iPhone|iPad|iPod/i.test(userAgent);
+  const isAndroid=/Android/i.test(userAgent);
+  if(installInstructions){
+    installInstructions.innerHTML=isIos
+      ? '<strong>En iPhone o iPad</strong><br>1. Abre este enlace en Safari.<br>2. Pulsa Compartir.<br>3. Elige “Añadir a pantalla de inicio”.<br><br>No necesitas descargar nada ni usar la App Store.'
+      : isAndroid
+        ? '<strong>En Android</strong><br>1. Abre este enlace en Chrome.<br>2. Pulsa “Instalar app” o el menú ⋮ → “Instalar app”.<br>3. Confirma la instalación.<br><br>La aplicación se añade a la pantalla de inicio sin pasar por Google Play.'
+        : '<strong>En ordenador</strong><br>Usa el icono de instalación de la barra de direcciones o el menú del navegador → “Instalar Cuartel de la Cava”.<br><br>Es una aplicación web instalable; no requiere descargar un ejecutable.';
+  }
+  if(installQrWrap)installQrWrap.hidden=true;
+  if(shareLinkField)shareLinkField.hidden=true;
+  if(copyShareLinkBtn)copyShareLinkBtn.hidden=true;
+  if(installModal)installModal.hidden=false;
+}
+function openShareModal(){
+  drawInstallQr();
+  if(installTitle)installTitle.textContent='Compartir enlace';
+  if(installInstructions)installInstructions.textContent='Comparte este enlace con los vecinos para que puedan entrar en la comunidad.';
+  if(installQrWrap)installQrWrap.hidden=true;
+  if(shareLinkField)shareLinkField.hidden=false;
+  if(copyShareLinkBtn){copyShareLinkBtn.hidden=false;copyShareLinkBtn.textContent='Copiar enlace';}
+  if(installModal)installModal.hidden=false;
+}
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;if(installAppBtn)installAppBtn.hidden=false;});
 installAppBtn?.addEventListener('click',async()=>{if(deferredInstallPrompt){deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installAppBtn.hidden=true;}else openInstallModal();});
-shareAppBtn?.addEventListener('click',openInstallModal);
+shareAppBtn?.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:'Comunidad Cuartel de la Cava',url:appShareUrl});return;}catch(error){if(error?.name==='AbortError')return;}}openShareModal();});
 document.querySelector('#copyShareLinkBtn')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(appShareUrl);showToast('Enlace copiado.');}catch(e){shareAppLink?.select();document.execCommand('copy');showToast('Enlace copiado.');}});
 document.querySelectorAll('[data-close="installModal"]').forEach(button=>button.addEventListener('click',()=>{if(installModal)installModal.hidden=true;}));
