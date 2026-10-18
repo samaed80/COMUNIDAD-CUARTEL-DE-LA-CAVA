@@ -317,3 +317,34 @@
     font-size:9px!important;
   }
 }
+
+
+/* Distribución estable de las acciones del perfil: sin solapamientos. */
+.profile-actions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px;
+  width:100%;
+}
+.profile-actions .outline-btn,
+.profile-actions #openNeighborChatBtn{
+  display:block;
+  width:100%!important;
+  min-width:0;
+  margin:0!important;
+  padding:5px 6px!important;
+  font-size:9px!important;
+  line-height:1.15;
+  white-space:normal;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.profile-actions #openNeighborChatBtn{
+  grid-column:1 / -1;
+}
+@media(max-width:850px){
+  .profile-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:4px;
+  }
+}
