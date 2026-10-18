@@ -1,0 +1,26 @@
+{
+  "name": "Comunidad de vecinos Cuartel de la Cava",
+  "short_name": "Cuartel de la Cava",
+  "description": "Información y comunicaciones de la comunidad de vecinos.",
+  "lang": "es",
+  "start_url": "./?entrar=1",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f8fbf7",
+  "theme_color": "#17343a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
