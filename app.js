@@ -314,3 +314,23 @@ function removePortalReferences(){
   if(incidentTitle)incidentTitle.placeholder='Por ejemplo: luz fundida en las zonas comunes';
 }
 renderCurrentDate(); renderNotices(); renderCalendar(); renderIncidents(); removePortalReferences(); syncDocumentPermissions(); initSupabase().then(()=>{refreshChatNotifications(false);setInterval(()=>{refreshChatNotifications(true);refreshNoveltyNotifications();},12000);});
+
+
+// Instalación y compartir la aplicación.
+let deferredInstallPrompt=null;
+const installAppBtn=document.querySelector('#installAppBtn');
+const shareAppBtn=document.querySelector('#shareAppBtn');
+const installModal=document.querySelector('#installModal');
+const shareAppLink=document.querySelector('#shareAppLink');
+const installQr=document.querySelector('#installQr');
+const appShareUrl=window.location.origin+window.location.pathname;
+function drawInstallQr(){
+  if(shareAppLink) shareAppLink.value=appShareUrl;
+  if(installQr&&window.QRCode) QRCode.toCanvas(installQr,appShareUrl,{width:220,margin:2,color:{dark:'#17343a',light:'#ffffff'}},()=>{});
+}
+function openInstallModal(){drawInstallQr();if(installModal)installModal.hidden=false;}
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;if(installAppBtn)installAppBtn.hidden=false;});
+installAppBtn?.addEventListener('click',async()=>{if(deferredInstallPrompt){deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installAppBtn.hidden=true;}else openInstallModal();});
+shareAppBtn?.addEventListener('click',openInstallModal);
+document.querySelector('#copyShareLinkBtn')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(appShareUrl);showToast('Enlace copiado.');}catch(e){shareAppLink?.select();document.execCommand('copy');showToast('Enlace copiado.');}});
+document.querySelectorAll('[data-close="installModal"]').forEach(button=>button.addEventListener('click',()=>{if(installModal)installModal.hidden=true;}));
