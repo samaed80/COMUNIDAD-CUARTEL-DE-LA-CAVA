@@ -200,3 +200,52 @@
     right:2px!important;
   }
 }
+
+
+/* Escala legible para el contenido móvil. */
+@media(max-width:850px){
+  .main-content{
+    padding-left:18px;
+    padding-right:18px;
+  }
+  .welcome h1{
+    font-size:clamp(44px,11.8vw,58px)!important;
+  }
+  .lead{
+    font-size:16px;
+    line-height:1.5;
+  }
+  .section-heading h2,
+  .bottom-preview h2{
+    font-size:30px!important;
+  }
+  .quick-actions button#quickIncidentBtn strong{
+    font-size:17px;
+  }
+  .quick-actions button#quickIncidentBtn small{
+    font-size:13px;
+  }
+  .resident-card h3{
+    font-size:18px;
+  }
+  .profile-line{
+    font-size:12px;
+  }
+  .profile-actions .outline-btn{
+    font-size:12px;
+    padding:10px;
+  }
+  .notice-card h3{
+    font-size:15px;
+  }
+  .notice-card p{
+    font-size:13px;
+    line-height:1.5;
+  }
+  .incident-card h3{
+    font-size:14px;
+  }
+  .incident-card p{
+    font-size:12px;
+  }
+}
