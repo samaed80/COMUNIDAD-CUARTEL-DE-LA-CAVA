@@ -128,3 +128,28 @@
 
 
 @media(max-width:850px){.mobile-nav:has(#mobileRequestsNav:not([hidden])){grid-template-columns:repeat(6,minmax(0,1fr));}.mobile-nav:has(#mobileRequestsNav:not([hidden])) #mobileRequestsNav small{font-size:8px;}}
+
+
+/* Portada: incidencia y perfil en paralelo, con la misma altura. */
+.quick-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  align-items:stretch;
+  margin:0 0 30px;
+}
+.quick-actions > .resident-card{
+  height:100%;
+  margin:0;
+}
+.quick-actions button#quickIncidentBtn{
+  height:100%;
+}
+@media(max-width:850px){
+  .quick-actions{
+    grid-template-columns:1fr;
+  }
+  .quick-actions > .resident-card{
+    height:auto;
+  }
+}
