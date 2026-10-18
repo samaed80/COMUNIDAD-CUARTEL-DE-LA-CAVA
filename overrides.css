@@ -570,6 +570,8 @@
   padding:6px 2px calc(7px + env(safe-area-inset-bottom,0px))!important;
 }
 .mobile-nav button{
+  pointer-events:auto!important;
+  touch-action:manipulation;
   flex:1 1 0!important;
   width:auto!important;
   min-width:0!important;
