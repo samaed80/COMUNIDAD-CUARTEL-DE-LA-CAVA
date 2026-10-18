@@ -68,7 +68,7 @@ begin
   end if;
   perform net.http_post(
     url := 'https://kfshosgybldzqevtduem.supabase.co/functions/v1/send-push-notification',
-    headers := jsonb_build_object('Content-Type','application/json','x-push-webhook-secret','cfaa1273a08dc402b483b394416f13e734cf7c7f17be158a75f7820a20566ad0'),
+    headers := jsonb_build_object('Content-Type','application/json','Authorization','Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmc2hvc2d5YmxkenFldnRkdWVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MzU1NDMsImV4cCI6MjEwNjAxMTU0M30.nskRoEEuymA2ncfzfrAO9P2Nqud1o9X8F4USQj9c23U','x-push-webhook-secret','cfaa1273a08dc402b483b394416f13e734cf7c7f17be158a75f7820a20566ad0'),
     body := jsonb_build_object('kind',v_kind,'sender_role',v_sender_role,'title',v_title,'body',v_body)
   );
   return new;
