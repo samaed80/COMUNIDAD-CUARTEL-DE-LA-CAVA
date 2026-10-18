@@ -374,3 +374,34 @@
 #requestUnreadCount{
   display:none!important;
 }
+
+
+/* Contadores visibles en todas las vistas, siempre en verde. */
+.mobile-nav .nav-unread-badge,
+.side-nav .nav-unread-badge,
+#notificationBadge,
+#noticeUnreadCount,
+#incidentUnreadCount,
+#suggestionUnreadCount,
+#requestUnreadCount{
+  display:inline-grid!important;
+  place-items:center;
+  min-width:17px;
+  min-height:17px;
+  padding:0 5px;
+  border-radius:999px;
+  background:#4f855d!important;
+  color:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+  font:700 9px var(--sans);
+}
+.mobile-nav .nav-unread-badge[hidden],
+.side-nav .nav-unread-badge[hidden],
+#notificationBadge[hidden],
+#noticeUnreadCount[hidden],
+#incidentUnreadCount[hidden],
+#suggestionUnreadCount[hidden],
+#requestUnreadCount[hidden]{
+  display:none!important;
+}
