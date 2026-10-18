@@ -552,3 +552,30 @@
     margin:0!important;
   }
 }
+
+
+/* Barra inferior en escritorio y móvil: seis iconos siempre en una sola fila. */
+.mobile-nav{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:stretch!important;
+  justify-content:space-between!important;
+  grid-template-columns:none!important;
+  grid-template-rows:none!important;
+  gap:0!important;
+  width:100vw!important;
+  max-width:100vw!important;
+  overflow:hidden!important;
+  padding:6px 2px calc(7px + env(safe-area-inset-bottom,0px))!important;
+}
+.mobile-nav button{
+  flex:1 1 0!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  grid-column:auto!important;
+  grid-row:auto!important;
+  padding:0 1px!important;
+  margin:0!important;
+}
