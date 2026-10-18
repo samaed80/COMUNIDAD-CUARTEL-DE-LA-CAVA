@@ -579,3 +579,7 @@
   padding:0 1px!important;
   margin:0!important;
 }
+
+
+/* Acciones de instalación y compartición. */
+.welcome-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.install-app-btn[hidden]{display:none}.install-modal{max-width:430px}.install-qr-wrap{display:grid;place-items:center;margin:10px 0 16px;padding:10px;background:#fff;border:1px solid var(--line);border-radius:10px}.install-qr-wrap canvas{max-width:100%;height:auto}.install-modal label{font-size:11px;font-weight:700}.install-modal input{display:block;width:100%;margin-top:7px;border:1px solid var(--line);border-radius:6px;padding:11px;background:#fff;font-size:12px}@media(max-width:850px){.welcome-actions{display:grid;grid-template-columns:1fr;justify-content:stretch}.welcome-actions button{width:100%}.install-modal{max-height:calc(100vh - 30px);overflow:auto}}
