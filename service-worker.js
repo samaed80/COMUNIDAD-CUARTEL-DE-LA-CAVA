@@ -1,9 +1,9 @@
-const CACHE_NAME = "cuartel-de-la-cava-pwa-v7";
+const CACHE_NAME = "cuartel-de-la-cava-pwa-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css?v=45",
-  "./overrides.css?v=49",
+  "./overrides.css?v=50",
   "./access-entry.css?v=5",
   "./app.js?v=107",
   "./manifest.webmanifest?v=1",
