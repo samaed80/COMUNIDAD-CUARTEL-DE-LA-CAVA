@@ -1,4 +1,4 @@
-const CACHE_NAME = "cuartel-de-la-cava-pwa-v2";
+const CACHE_NAME = "cuartel-de-la-cava-pwa-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,7 +7,7 @@ const APP_SHELL = [
   "./access-entry.css?v=5",
   "./app.js?v=103",
   "./manifest.webmanifest?v=1",
-  "./icon.svg?v=2"
+  "./icon.svg?v=3"
 ];
 
 self.addEventListener("install", event => {
