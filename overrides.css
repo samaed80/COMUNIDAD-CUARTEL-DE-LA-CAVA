@@ -153,3 +153,50 @@
     height:auto;
   }
 }
+
+
+/* Ajustes finales de layout responsive. */
+.profile-actions{
+  display:grid;
+  gap:8px;
+  width:100%;
+}
+.profile-actions .outline-btn{
+  margin-top:0;
+  min-width:0;
+}
+
+@media(max-width:850px){
+  .mobile-nav{
+    width:100vw!important;
+    max-width:100vw!important;
+    min-width:0!important;
+    overflow:hidden!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:0!important;
+    padding-left:4px!important;
+    padding-right:4px!important;
+  }
+  .mobile-nav:has(#mobileRequestsNav:not([hidden])){
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  }
+  .mobile-nav button{
+    min-width:0!important;
+    width:100%!important;
+    padding-left:0!important;
+    padding-right:0!important;
+    overflow:hidden;
+  }
+  .mobile-nav button small{
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:clip;
+    white-space:nowrap;
+    font-size:clamp(7px,2.3vw,9px)!important;
+    letter-spacing:-.03em;
+  }
+  .mobile-nav .nav-unread-badge{
+    right:2px!important;
+  }
+}
