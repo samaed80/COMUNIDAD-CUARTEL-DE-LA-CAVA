@@ -348,3 +348,17 @@
     gap:4px;
   }
 }
+
+
+/* El estado y las acciones del perfil deben ocupar filas independientes. */
+.profile-compact-row{
+  display:block!important;
+  width:100%;
+}
+.profile-line{
+  width:100%;
+}
+.profile-actions{
+  width:100%;
+  margin-top:8px;
+}
