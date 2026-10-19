@@ -736,3 +736,23 @@
   .documents-modal{width:100%;max-height:calc(100dvh - 20px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .documents-modal .document-list{max-height:none;overflow:visible;}
 }
+
+
+/* Desplazamiento definitivo del visor de documentos. */
+.documents-modal{
+  height:auto!important;
+  max-height:calc(100dvh - 32px)!important;
+  overflow-y:scroll!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+.documents-modal .document-list{
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+@media(max-width:850px){
+  .modal-backdrop{overflow-y:auto!important;}
+  .documents-modal{max-height:calc(100dvh - 20px)!important;}
+}
