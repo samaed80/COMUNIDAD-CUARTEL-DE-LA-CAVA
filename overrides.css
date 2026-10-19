@@ -788,3 +788,47 @@
     max-height:calc(100dvh - 290px)!important;
   }
 }
+
+
+/* Correccion final: el scroll pertenece exclusivamente al listado de documentos. */
+#documentsModal .documents-modal{
+  display:flex!important;
+  flex-direction:column!important;
+  box-sizing:border-box!important;
+  height:calc(100vh - 32px)!important;
+  height:calc(100dvh - 32px)!important;
+  max-height:calc(100vh - 32px)!important;
+  max-height:calc(100dvh - 32px)!important;
+  overflow:hidden!important;
+  min-height:0!important;
+}
+#documentsModal #documentList{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  flex:0 0 auto!important;
+  height:calc(100vh - 300px)!important;
+  height:calc(100dvh - 300px)!important;
+  min-height:120px!important;
+  max-height:calc(100vh - 300px)!important;
+  max-height:calc(100dvh - 300px)!important;
+  overflow-y:scroll!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch!important;
+  padding-bottom:18px!important;
+}
+@media(max-width:850px){
+  #documentsModal .documents-modal{
+    height:calc(100vh - 20px)!important;
+    height:calc(100dvh - 20px)!important;
+    max-height:calc(100vh - 20px)!important;
+    max-height:calc(100dvh - 20px)!important;
+  }
+  #documentsModal #documentList{
+    height:calc(100vh - 275px)!important;
+    height:calc(100dvh - 275px)!important;
+    max-height:calc(100vh - 275px)!important;
+  }
+}
