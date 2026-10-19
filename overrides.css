@@ -608,6 +608,23 @@
 }
 .mobile-nav button{color:#fff!important;font-size:20px!important;min-height:48px!important}
 .mobile-nav button small{color:#fff!important;font-size:9px!important}
+
+/* La barra móvil debe recibir siempre el toque por encima del contenido. */
+@media(max-width:850px){
+  .mobile-nav{
+    z-index:100!important;
+    isolation:isolate!important;
+  }
+  .mobile-nav button{
+    position:relative!important;
+    z-index:1!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+  .mobile-nav .nav-unread-badge{
+    pointer-events:none!important;
+  }
+}
 @media(min-width:851px){
   .app-shell{display:block!important;min-height:100vh}
   .sidebar{display:none!important}
