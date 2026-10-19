@@ -844,3 +844,12 @@
   z-index:51!important;
   margin-bottom:20px!important;
 }
+
+
+/* Corrección definitiva de capas: el visor nunca queda debajo de la navegación fija. */
+#documentsModal{
+  z-index:1000!important;
+}
+#documentsModal .documents-modal{
+  z-index:1001!important;
+}
