@@ -1123,3 +1123,27 @@ body.documents-viewer-open .mobile-nav{
 @media(max-width:850px){
   .toast{top:68px!important;bottom:auto!important;}
 }
+
+/* Confirmación y estados de solicitudes: el estado se entiende también sin color. */
+.incident-submission-status{display:flex;align-items:flex-start;gap:12px;margin:0 0 18px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px;line-height:1.45}
+.incident-submission-status[hidden]{display:none}
+.incident-submission-status.is-sent{border-color:#9fc8df;background:var(--blue);color:#28566e}
+.incident-submission-status.is-error{border-color:#e4a090;background:#fff0eb;color:#8e3f31}
+.submission-status-symbol{display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:#4d87a4;color:#fff;font-weight:800}
+.is-error .submission-status-symbol{background:#c95d4a}
+.incident-submission-status strong{display:block;font-size:13px;margin-bottom:3px}
+.incident-submission-status p{margin:3px 0}
+.incident-submission-status code{font-size:10px;overflow-wrap:anywhere}
+.incident-submission-status button{margin-top:8px;padding:7px 10px}
+.incident-status{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.incident-status.status-pending{color:#28566e;background:var(--blue)}
+.incident-status.status-reviewed{color:#85651e;background:var(--yellow)}
+.incident-status.status-resolved{color:#39764b;background:var(--green)}
+.incident-status.status-cancelled{color:#8e3f31;background:#fff0eb}
+.incident-status.status-sending{color:#5f6d70;background:#edf0ef}
+.incident-status .status-symbol{font-weight:800}
+.incident-updated-at{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+@media(max-width:850px){
+  .incident-submission-status{margin-bottom:14px;padding:12px}
+  .incident-status{grid-column:2;justify-self:start;margin-top:4px}
+}
