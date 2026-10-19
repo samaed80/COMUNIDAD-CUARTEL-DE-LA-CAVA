@@ -1,13 +1,13 @@
-const CACHE_NAME = "cuartel-de-la-cava-pwa-v31";
+const CACHE_NAME = "cuartel-de-la-cava-pwa-v32";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css?v=45",
-  "./overrides.css?v=58",
+  "./overrides.css?v=6abb64c",
   "./access-entry.css?v=5",
   "./navigation-fix.css?v=1",
   "./notification-overrides.js?v=1",
-  "./app.js?v=120",
+  "./app.js?v=f2edbf9",
   "./manifest.webmanifest?v=1",
   "./icon.svg?v=3"
 ];
@@ -22,7 +22,7 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
-  event.respondWith(fetch(event.request).then(response => {
+  event.respondWith(fetch(new Request(event.request, { cache: "no-store" })).then(response => {
     const copy = response.clone();
     caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
     return response;
