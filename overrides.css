@@ -892,3 +892,55 @@
     padding:22px 14px 120px!important;
   }
 }
+
+
+/* El visor de documentos tiene una capa exclusiva: nada puede taparlo ni capturar el desplazamiento. */
+html.documents-viewer-open,
+body.documents-viewer-open{
+  overflow:hidden!important;
+}
+body.documents-viewer-open .mobile-nav{
+  display:none!important;
+}
+#documentsModal{
+  position:fixed!important;
+  inset:0!important;
+  display:block!important;
+  padding:0!important;
+  overflow-y:scroll!important;
+  overflow-x:hidden!important;
+  z-index:10000!important;
+  touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#documentsModal .documents-modal{
+  position:relative!important;
+  width:min(760px,calc(100% - 24px))!important;
+  max-width:760px!important;
+  min-height:calc(100dvh - 24px)!important;
+  height:auto!important;
+  max-height:none!important;
+  margin:12px auto!important;
+  overflow:visible!important;
+  padding:28px 24px 150px!important;
+}
+#documentsModal #documentList{
+  display:block!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+  padding-bottom:30px!important;
+}
+#documentsModal .document-row{
+  width:100%!important;
+  margin-bottom:10px!important;
+}
+@media(max-width:850px){
+  #documentsModal .documents-modal{
+    width:calc(100% - 16px)!important;
+    min-height:calc(100dvh - 16px)!important;
+    margin:8px auto!important;
+    padding:24px 14px 150px!important;
+  }
+}
