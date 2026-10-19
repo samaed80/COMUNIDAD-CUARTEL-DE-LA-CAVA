@@ -73,7 +73,34 @@ function renderCalendar(){
 function noticeKey(item){return String(item.id||item.created_at||item.title||'');}
 function isNoticeUnread(item){const seen=readSeenIds('comunidad-seen-notices');return !seen.includes(noticeKey(item));}
 function renderNotices(){noticeList.innerHTML=notices.length?notices.map((n,index)=>{const unread=isNoticeUnread(n);return '<article class="notice-card'+(unread?' is-unread':'')+'" data-notice-key="'+escapeHtml(noticeKey(n))+'"><div class="notice-date"><b>'+escapeHtml(n.date)+'</b>'+escapeHtml(n.month)+'</div><div class="notice-copy"><h3>'+escapeHtml(n.title)+(unread?'<span class="new-label">Nuevo</span>':'')+'</h3><p>'+escapeHtml(n.message)+'</p></div><span class="notice-tag">'+escapeHtml(n.tag)+'</span>'+(currentRole==='admin'?'<button class="notice-remove" type="button" data-notice-id="'+escapeHtml(n.id||'')+'" data-notice-index="'+index+'" aria-label="Eliminar aviso">Eliminar</button>':'')+'</article>';}).join(''):'<p class="documents-empty">Todavía no hay avisos publicados.</p>';const summary=document.querySelector('#noticeResultsSummary');if(summary)summary.textContent=noticeTotal?'Mostrando '+Math.min(notices.length,noticeTotal)+' de '+noticeTotal:'';const more=document.querySelector('#noticeLoadMoreBtn');if(more){more.hidden=notices.length>=noticeTotal||!noticeTotal;more.onclick=loadMoreNotices;}noticeList.querySelectorAll('[data-notice-key]').forEach(card=>card.onclick=()=>{writeSeenIds('comunidad-seen-notices',readSeenIds('comunidad-seen-notices').concat(card.dataset.noticeKey));writeSeenIds('comunidad-top-seen-notices',readSeenIds('comunidad-top-seen-notices').concat(card.dataset.noticeKey));refreshNoveltyNotifications();renderNotices();});noticeList.querySelectorAll('[data-notice-index]').forEach(button=>button.onclick=async event=>{event.stopPropagation();const index=Number(button.dataset.noticeIndex);if(!Number.isInteger(index)||!notices[index])return;if(!window.confirm('¿Quieres eliminar el aviso «'+notices[index].title+'»?'))return;if(notices[index].id&&supabaseClient&&supabaseSession){await deleteRemoteNotice(notices[index].id);return;}notices.splice(index,1);renderNotices();renderCalendar();showToast('Aviso eliminado.');});}
-const incidentStatusLabels={pending:'Pendiente',reviewed:'Tramitado',resolved:'Solucionado',cancelled:'Eliminado'};
+const incidentStatusLabels={pending:'Enviada al administrador',reviewed:'En tramitación',resolved:'Tramitada / Resuelta',cancelled:'Eliminada'};
+function incidentStatusMeta(item){
+  const sending=item?._clientStatus==='sending';
+  if(sending)return{key:'sending',label:'Enviando…',icon:'↻'};
+  const key=String(item?.status||'pending').toLowerCase();
+  if(key==='reviewed')return{key,label:'En tramitación',icon:'◐'};
+  if(key==='resolved')return{key,label:'Tramitada / Resuelta',icon:'✓✓'};
+  if(key==='cancelled')return{key,label:'Eliminada',icon:'×'};
+  return{key:'pending',label:'Enviada al administrador',icon:'✓'};
+}
+function incidentDate(value){if(!value)return'—';try{return new Intl.DateTimeFormat('es-ES',{dateStyle:'short',timeStyle:'short'}).format(new Date(value));}catch{return String(value);}}
+function ensureIncidentSubmissionStatus(){
+  let panel=document.querySelector('#incidentSubmissionStatus');
+  if(panel)return panel;
+  const section=document.querySelector('#incidencias');
+  if(!section)return null;
+  panel=document.createElement('div');panel.id='incidentSubmissionStatus';panel.className='incident-submission-status';panel.setAttribute('role','status');panel.setAttribute('aria-live','polite');panel.hidden=true;
+  section.querySelector('.section-heading')?.after(panel);
+  return panel;
+}
+function showIncidentSubmissionStatus(item,errorMessage=''){
+  const panel=ensureIncidentSubmissionStatus();if(!panel)return;
+  const isError=Boolean(errorMessage),type=String(item?.type||'Incidencia').toLowerCase()==='sugerencia'?'sugerencia':'incidencia';
+  panel.hidden=false;panel.className=`incident-submission-status ${isError?'is-error':'is-sent'}`;
+  panel.innerHTML=isError?`<span class="submission-status-symbol" aria-hidden="true">!</span><div><strong>Error de envío</strong><p>${escapeHtml(errorMessage)}</p><button type="button" class="secondary-btn" data-retry-incident>Reintentar</button></div>`:`<span class="submission-status-symbol" aria-hidden="true">✓</span><div><strong>${type[0].toUpperCase()+type.slice(1)} enviada al administrador</strong><p>Recibida el ${incidentDate(item?.created_at||new Date())}. Estado: <b>${escapeHtml(incidentStatusMeta(item).label)}</b>.</p><p>Referencia: <code>${escapeHtml(item?.id||'pendiente')}</code></p></div>`;
+  panel.querySelector('[data-retry-incident]')?.addEventListener('click',()=>document.querySelector('#incidentModal')?.querySelector('form')?.requestSubmit());
+}
+function clearIncidentSubmissionStatus(){const panel=document.querySelector('#incidentSubmissionStatus');if(panel){panel.hidden=true;panel.innerHTML='';}}
 function getIncidentAttachments(item){let raw=item?.attachments??item?.photos??item?.images??item?.photo_urls??[];if(typeof raw==='string'){try{raw=JSON.parse(raw);}catch{raw=[];}}if(raw&&typeof raw==='object'&&!Array.isArray(raw)){raw=raw.files||raw.items||raw.photos||raw.attachments||[];}return Array.isArray(raw)?raw:[];}
 function incidentCard(i,index=0){const status=incidentStatusLabels[i.status]||i.status||'Pendiente';const id=escapeHtml(i.id||'');const isHistory=['resolved','cancelled'].includes(String(i.status||'').toLowerCase());const isIncident=String(i.type||'Incidencia').toLowerCase()!=='sugerencia';const failed=i.email_status==='failed';const alreadySent=Boolean(i.sent_at)||i.email_status==='sent';const incidentAttachments=getIncidentAttachments(i);const photoCount=incidentAttachments.length;const incidentSeenKey=String(i.id||'');const incidentSeenList=readSeenIds(String(i.type||'').toLowerCase()==='sugerencia'?'comunidad-seen-suggestions':'comunidad-seen-incidents');const incidentIsUnread=incidentSeenKey&&!incidentSeenList.includes(incidentSeenKey);const noveltyLabel=incidentIsUnread?'<span class="new-label">Novedad</span>':'';const photoButton=isIncident?`<button type="button" class="incident-photo-btn" data-incident-photos="${id}" data-incident-index="${index}">Ver fotos${photoCount?` (${photoCount})`:''}</button>`:'';const adminActions=currentRole==='admin'&&!isHistory&&i.id?`${isIncident&&!alreadySent?`<button type="button" data-incident-email="${id}">${failed?'Reenviar correo':'Enviar correo'}</button>`:''}${i.status!=='reviewed'?`<button type="button" data-incident-status="reviewed" data-incident-id="${id}">Tramitado</button>`:''}<button type="button" data-incident-status="resolved" data-incident-id="${id}">Solucionado</button><button type="button" data-incident-delete="${id}">Eliminar</button>`:'';const actions=(adminActions||photoButton)?`<div class="incident-actions">${photoButton}${adminActions}</div>`:'';const resident=approvedResidents.find(item=>String(item.anonymous_user_id||'')===String(i.created_by||''));const reporter=resident?.full_name||i.reporter_name||i.neighbor_name||i.full_name||i.created_by_name||i.requester_name||i.user_name||(currentRole==='admin'&&supabaseSession?.user?.id&&String(i.created_by)===String(supabaseSession.user.id)?'Administrador de la aplicación':'');const reporterPhone=resident?.phone||i.reporter_phone||i.neighbor_phone||i.phone||'';const reporterFloor=resident?.floor||i.reporter_floor||i.neighbor_floor||i.floor||'';const reporterInfo=currentRole==='admin'&&reporter?'<small class="incident-reporter">Comunica: '+escapeHtml(reporter)+(reporterPhone?' · Teléfono: '+escapeHtml(reporterPhone):'')+(reporterFloor?' · Piso: '+escapeHtml(reporterFloor):'')+'</small>':'';const emailInfo=alreadySent?' · Correo enviado':failed?' · Pendiente de envío':'';return `<article class="incident-card${incidentIsUnread?' is-unread':''}" data-incident-key="${id}" data-incident-type="${escapeHtml(i.type||'')}"><span class="incident-icon">⌁</span><div><h3>${index+1}. ${escapeHtml(i.title)}${noveltyLabel}</h3><p>${escapeHtml(i.message||i.text||'')}${i.location?` · ${escapeHtml(i.location)}`:''}</p><small>${escapeHtml(i.type||'Incidencia')} · ${i.created_at?new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(i.created_at)):escapeHtml(i.text||'')}${emailInfo}</small>${reporterInfo}${failed&&currentRole==='admin'?`<small class="incident-email-error">Error de envío: ${escapeHtml(i.email_error||'No se pudo enviar el correo.')}</small>`:''}${actions}</div><span class="incident-status">${escapeHtml(status)}</span></article>`;}
 async function openIncidentPhotos(incidentId,incidentIndex=-1){
@@ -448,3 +475,73 @@ installAppBtn?.addEventListener('click',async()=>{if(deferredInstallPrompt){defe
 shareAppBtn?.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:'Comunidad Cuartel de la Cava',url:appShareUrl});return;}catch(error){if(error?.name==='AbortError')return;}}openShareModal();});
 document.querySelector('#copyShareLinkBtn')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(appShareUrl);showToast('Enlace copiado.');}catch(e){shareAppLink?.select();document.execCommand('copy');showToast('Enlace copiado.');}});
 document.querySelectorAll('[data-close="installModal"]').forEach(button=>button.addEventListener('click',()=>{if(installModal)installModal.hidden=true;}));
+
+/* Flujo confirmado de incidencias: se redefine aquí para mantener intactas las demás funciones. */
+function renderIncidents(){
+  const allItems=remoteIncidents.length?remoteIncidents:incidents,terminal=['resolved','cancelled'];
+  const active=allItems.filter(i=>!terminal.includes(String(i.status||'pending').toLowerCase()));
+  const visible=currentRole==='admin'?(showIncidentHistory?allItems.filter(i=>terminal.includes(String(i.status||'').toLowerCase())):active):allItems;
+  const incidentItems=visible.filter(i=>String(i.type||'Incidencia').toLowerCase()!=='sugerencia');
+  const suggestionItems=visible.filter(i=>String(i.type||'').toLowerCase()==='sugerencia');
+  renderIncidentList(incidentList,incidentItems,showIncidentHistory?'No hay incidencias cerradas en el histórico.':currentRole==='admin'?'Todavía no hay incidencias pendientes.':'Todavía no has enviado incidencias.');
+  renderIncidentList(suggestionList,suggestionItems,showIncidentHistory?'No hay sugerencias cerradas en el histórico.':currentRole==='admin'?'Todavía no hay sugerencias pendientes.':'Todavía no has enviado sugerencias.');
+  const heading=document.querySelector('#incidentHeading'),note=document.querySelector('#incidentPermission'),toggle=document.querySelector('#incidentHistoryBtn');
+  if(heading)heading.textContent=showIncidentHistory?'Histórico de incidencias y sugerencias':currentRole==='admin'?'Incidencias y sugerencias':'Mis solicitudes';
+  if(note)note.textContent=currentRole==='admin'?(showIncidentHistory?'Actuaciones cerradas o eliminadas.':'Pendientes de tramitar o en seguimiento.'):'Aquí puedes comprobar que tus incidencias y sugerencias han llegado al administrador y consultar su estado.';
+  if(toggle)toggle.textContent=showIncidentHistory?'← Volver a incidencias':'Ver histórico';
+  const summary=document.querySelector('#incidentResultsSummary');if(summary)summary.textContent=currentRole==='admin'&&incidentItems.length?'Mostrando '+incidentItems.length+' incidencia'+(incidentItems.length===1?'':'s'):'';
+  const more=document.querySelector('#incidentLoadMoreBtn');if(more){more.hidden=remoteIncidents.length>=incidentTotal||!incidentTotal;more.onclick=loadMoreIncidents;}
+}
+function decorateIncidentStatusBadges(){
+  document.querySelectorAll('.incident-status').forEach(badge=>{
+    if(badge.querySelector('.status-symbol'))return;
+    const text=badge.textContent.trim(),key=text.includes('En tramitación')?'reviewed':text.includes('Tramitada')||text.includes('Solucionada')?'resolved':text.includes('Eliminada')?'cancelled':text.includes('Enviando')?'sending':'pending';
+    badge.classList.add('status-'+key);badge.innerHTML=`<span class="status-symbol" aria-hidden="true">${key==='resolved'?'✓✓':key==='reviewed'?'◐':key==='cancelled'?'×':key==='sending'?'↻':'✓'}</span> ${escapeHtml(text)}`;badge.setAttribute('aria-label','Estado: '+text);
+  });
+  document.querySelectorAll('.incident-card[data-incident-key]').forEach(card=>{
+    if(card.querySelector('.incident-updated-at'))return;
+    const item=remoteIncidents.find(entry=>String(entry.id)===String(card.dataset.incidentKey));
+    if(!item?.updated_at||item.updated_at===item.created_at)return;
+    const copy=card.querySelector(':scope > div');if(!copy)return;
+    const line=document.createElement('small');line.className='incident-updated-at';line.textContent='Último cambio: '+incidentDate(item.updated_at);copy.append(line);
+  });
+}
+if(typeof MutationObserver!=='undefined')new MutationObserver(decorateIncidentStatusBadges).observe(document.body,{childList:true,subtree:true});
+
+const confirmedIncidentForm=document.querySelector('#incidentForm');
+if(confirmedIncidentForm)confirmedIncidentForm.onsubmit=async event=>{
+  event.preventDefault();
+  if(confirmedIncidentForm.dataset.submitting==='1')return;
+  const data=new FormData(confirmedIncidentForm),type=String(data.get('type')||'Incidencia').trim(),title=String(data.get('title')||'').trim(),message=String(data.get('message')||'').trim(),location=String(data.get('location')||'').trim(),photos=incidentPhotoFiles.slice();
+  if(!supabaseClient||!supabaseSession){showToast('Necesitas iniciar sesión para comunicar una incidencia.');return;}
+  const submit=confirmedIncidentForm.querySelector('[type=submit]');confirmedIncidentForm.dataset.submitting='1';if(submit){submit.disabled=true;submit.setAttribute('aria-busy','true');submit.textContent='Enviando…';}
+  try{
+    await refreshRemoteIncidents();
+    const recentMatch=remoteIncidents.find(item=>String(item.type||'').toLowerCase()===type.toLowerCase()&&String(item.title||'').trim()===title&&String(item.message||item.text||'').trim()===message&&String(item.location||'').trim()===location&&item.created_at&&Date.now()-new Date(item.created_at).getTime()<15*60*1000);
+    let incidentId=recentMatch?.id,confirmed=recentMatch;
+    if(!incidentId){
+      const result=await supabaseClient.rpc('notify_new_incident',{p_title:title,p_message:message,p_location:location||null,p_type:type});
+      if(result.error)throw new Error(result.error.message||'No se pudo guardar la comunicación.');
+      incidentId=result.data;confirmed={id:incidentId,type,title,message,location,status:'pending',created_at:new Date().toISOString()};
+      if(photos.length)await uploadIncidentPhotos(incidentId,photos);
+      await refreshRemoteIncidents();
+      confirmed=remoteIncidents.find(item=>String(item.id)===String(incidentId))||confirmed;
+    }else if(photos.length&&getIncidentAttachments(recentMatch).length<photos.length){
+      await uploadIncidentPhotos(incidentId,photos);
+      await refreshRemoteIncidents();
+      confirmed=remoteIncidents.find(item=>String(item.id)===String(incidentId))||confirmed;
+    }
+    showIncidentSubmissionStatus(confirmed);
+    closeModal('incidentModal');
+    confirmedIncidentForm.reset();incidentPhotoFiles=[];renderIncidentPhotoList();
+    if(type.toLowerCase()==='incidencia'&&!confirmed.sent_at&&confirmed.email_status!=='sent'){
+      try{await sendIncidentEmail({id:incidentId});}catch(error){showToast('La incidencia ha sido recibida. El correo queda pendiente de envío.');}
+    }
+    await refreshRemoteIncidents();
+  }catch(error){
+    showIncidentSubmissionStatus({type},error.message||'No se pudo enviar la comunicación. Conservamos lo escrito para que puedas reintentarlo.');
+  }finally{
+    confirmedIncidentForm.dataset.submitting='0';if(submit){submit.disabled=false;submit.removeAttribute('aria-busy');submit.textContent=currentRole==='admin'?'Guardar incidencia':'Enviar al administrador';}
+  }
+};
+document.querySelectorAll('.role-choice').forEach(button=>button.addEventListener('click',()=>setTimeout(renderIncidents,0)));
