@@ -756,3 +756,9 @@
   .modal-backdrop{overflow-y:auto!important;}
   .documents-modal{max-height:calc(100dvh - 20px)!important;}
 }
+
+
+/* Visor de documentos: lista desplazable independiente en escritorio y móvil. */
+.documents-modal{display:flex!important;flex-direction:column!important;min-height:0!important;}
+.documents-modal .document-list{flex:1 1 auto!important;min-height:0!important;max-height:calc(100dvh - 270px)!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
+@media(max-width:850px){.documents-modal .document-list{max-height:calc(100dvh - 290px)!important;}}
