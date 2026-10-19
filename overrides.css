@@ -630,6 +630,24 @@
 .mobile-nav button{color:#fff!important;font-size:20px!important;min-height:48px!important}
 .mobile-nav button small{color:#fff!important;font-size:9px!important}
 
+/* La barra usa enlaces nativos: conservar el aspecto de botones e iconos. */
+.mobile-nav a{
+  flex:1 1 0!important;
+  min-width:0!important;
+  min-height:48px!important;
+  display:grid!important;
+  place-items:center!important;
+  align-content:center!important;
+  color:#fff!important;
+  font-size:0!important;
+  line-height:1!important;
+  text-decoration:none!important;
+  touch-action:manipulation!important;
+}
+.mobile-nav a .nav-icon{display:block!important;font:23px/1 Arial,sans-serif!important}
+.mobile-nav a small{display:block!important;color:#fff!important;font:700 9px/1 var(--sans)!important;margin-top:3px!important;white-space:nowrap!important}
+.mobile-nav a .nav-unread-badge{pointer-events:none!important}
+
 /* El aviso flotante es solo informativo y no debe interceptar la navegación. */
 .toast{pointer-events:none!important}
 
