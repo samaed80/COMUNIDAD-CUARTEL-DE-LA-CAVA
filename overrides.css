@@ -853,3 +853,42 @@
 #documentsModal .documents-modal{
   z-index:1001!important;
 }
+
+
+/* Visor de documentos: pantalla completa desplazable, compatible con Safari, Chrome y móvil. */
+#documentsModal{
+  position:fixed!important;
+  inset:0!important;
+  display:block!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding:12px!important;
+  z-index:1000!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+}
+#documentsModal .documents-modal{
+  width:min(720px,100%)!important;
+  max-width:720px!important;
+  height:auto!important;
+  min-height:calc(100dvh - 24px)!important;
+  max-height:none!important;
+  margin:0 auto!important;
+  overflow:visible!important;
+  padding-bottom:120px!important;
+}
+#documentsModal #documentList{
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+  padding-bottom:24px!important;
+}
+@media(max-width:850px){
+  #documentsModal{padding:8px 8px 90px!important;}
+  #documentsModal .documents-modal{
+    width:100%!important;
+    min-height:calc(100dvh - 16px)!important;
+    padding:22px 14px 120px!important;
+  }
+}
