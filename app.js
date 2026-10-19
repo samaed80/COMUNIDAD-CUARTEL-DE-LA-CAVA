@@ -239,23 +239,31 @@ document.querySelector('#userChoice').onclick=()=>{window.location.href=`${windo
 document.querySelector('#accessGateAction').onclick=()=>window.location.href=`${window.location.pathname}?registro=1`;
 document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>closeModal(button.dataset.close));
 document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.onclick=e=>{if(e.target===backdrop)closeModal(backdrop.id)});
-function navigateToSection(section){const chatTarget=section==='chat'?'solicitudes':section;document.querySelectorAll('[data-section]').forEach(item=>{const active=item.dataset.section===section;item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');});if(section==='chat'&&currentRole==='neighbor'){openNeighborCommunityChat();return;}if(section==='documentos'){openDocuments('consult');return;}const target=section==='inicio'?document.querySelector('.welcome'):document.getElementById(chatTarget);if(!target)return;const topbar=document.querySelector('.topbar');const offset=(topbar?.getBoundingClientRect().height||0)+12;const top=Math.max(0,target.getBoundingClientRect().top+window.scrollY-offset);window.scrollTo({top,behavior:'smooth'});}
+function navigateToSection(section){
+  const chatTarget=section==='chat'?'solicitudes':section;
+  document.querySelectorAll('[data-section]').forEach(item=>{
+    const active=item.dataset.section===section;
+    item.classList.toggle('active',active);
+    if(active)item.setAttribute('aria-current','page');
+    else item.removeAttribute('aria-current');
+  });
+  if(section==='chat'&&currentRole==='neighbor'){openNeighborCommunityChat();return;}
+  // Documentos es un acceso a la sección de la página, no una orden para abrir el modal.
+  const target=section==='inicio'?document.querySelector('.welcome'):document.getElementById(chatTarget);
+  if(!target)return;
+  const topbar=document.querySelector('.topbar');
+  const offset=(topbar?.getBoundingClientRect().height||0)+12;
+  const top=Math.max(0,target.getBoundingClientRect().top+window.scrollY-offset);
+  window.scrollTo({top,behavior:'smooth'});
+}
 function navigateFromHash(){const section=window.location.hash.replace(/^#/,'');if(['inicio','avisos','incidencias','chat','documentos','solicitudes'].includes(section))navigateToSection(section);}
 document.querySelectorAll('[data-mark-section]').forEach(button=>button.onclick=()=>markNotificationSectionAsRead(button.dataset.markSection));
-let lastMobileNavigationAt=0;
 document.querySelectorAll('.mobile-nav [data-section],.side-nav [data-section]').forEach(button=>{
   const activate=event=>{
-    if(event.type==='touchend'){
-      event.preventDefault();
-      lastMobileNavigationAt=Date.now();
-    }else if(Date.now()-lastMobileNavigationAt<700){
-      event.preventDefault();
-      return;
-    }
+    event.preventDefault();
     event.stopPropagation();
     navigateToSection(button.dataset.section);
   };
-  button.addEventListener('touchend',activate,{passive:false});
   button.addEventListener('click',activate,true);
 });
 window.addEventListener('hashchange',navigateFromHash);
