@@ -247,10 +247,15 @@ function navigateToSection(section){
     if(active)item.setAttribute('aria-current','page');
     else item.removeAttribute('aria-current');
   });
-  if(section==='chat'&&currentRole==='neighbor'){openNeighborCommunityChat();return;}
-  if(section==='chat'&&currentRole==='admin'){
-    const resident=approvedResidents.length===1?approvedResidents[0]:null;
-    if(resident){openCommunityChat(resident.id,resident.full_name);return;}
+  if(section==='chat'){
+    const chatArea=currentRole==='admin'?document.getElementById('solicitudes'):document.querySelector('.resident-card');
+    if(chatArea){
+      const topbar=document.querySelector('.topbar');
+      const offset=(topbar?.getBoundingClientRect().height||0)+12;
+      const top=Math.max(0,chatArea.getBoundingClientRect().top+window.scrollY-offset);
+      window.scrollTo({top,behavior:'smooth'});
+    }
+    return;
   }
   // Documentos es un acceso a la sección de la página, no una orden para abrir el modal.
   const target=section==='inicio'?document.querySelector('.welcome'):document.getElementById(chatTarget);
