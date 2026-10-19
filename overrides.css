@@ -632,6 +632,34 @@
 /* El aviso flotante es solo informativo y no debe interceptar la navegación. */
 .toast{pointer-events:none!important}
 
+/* Barra lateral de escritorio: iconos y texto siempre quedan separados. */
+@media(min-width:851px){
+  .side-nav .nav-item{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+    width:100%!important;
+    min-height:44px!important;
+    white-space:nowrap!important;
+  }
+  .side-nav .nav-item>span:first-child{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 26px!important;
+    width:26px!important;
+    margin:0!important;
+    font-size:19px!important;
+    line-height:1!important;
+  }
+  .side-nav .nav-item .nav-unread-badge{
+    flex:0 0 auto!important;
+    width:auto!important;
+    margin-left:auto!important;
+    font-size:9px!important;
+  }
+}
+
 /* La barra móvil debe recibir siempre el toque por encima del contenido. */
 @media(max-width:850px){
   .mobile-nav{
