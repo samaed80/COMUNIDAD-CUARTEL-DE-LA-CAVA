@@ -629,6 +629,9 @@
 .mobile-nav button{color:#fff!important;font-size:20px!important;min-height:48px!important}
 .mobile-nav button small{color:#fff!important;font-size:9px!important}
 
+/* El aviso flotante es solo informativo y no debe interceptar la navegación. */
+.toast{pointer-events:none!important}
+
 /* La barra móvil debe recibir siempre el toque por encima del contenido. */
 @media(max-width:850px){
   .mobile-nav{
