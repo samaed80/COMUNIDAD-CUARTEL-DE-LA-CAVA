@@ -944,3 +944,66 @@ body.documents-viewer-open .mobile-nav{
     padding:24px 14px 150px!important;
   }
 }
+
+
+/* Visor de documentos: barra vertical visible y lista independiente. */
+#documentsModal .documents-modal{
+  display:flex!important;
+  flex-direction:column!important;
+  width:min(760px,calc(100% - 24px))!important;
+  height:85vh!important;
+  height:85dvh!important;
+  min-height:0!important;
+  max-height:85vh!important;
+  max-height:85dvh!important;
+  margin:auto!important;
+  overflow:hidden!important;
+}
+#documentsModal #documentList{
+  display:block!important;
+  flex:1 1 auto!important;
+  width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow-y:scroll!important;
+  overflow-x:hidden!important;
+  scrollbar-width:auto!important;
+  scrollbar-color:#6b8d84 #e7eee9!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  padding:2px 12px 28px 2px!important;
+}
+#documentsModal #documentList::-webkit-scrollbar{
+  width:14px!important;
+  display:block!important;
+}
+#documentsModal #documentList::-webkit-scrollbar-track{
+  background:#e7eee9!important;
+  border-radius:8px!important;
+}
+#documentsModal #documentList::-webkit-scrollbar-thumb{
+  background:#6b8d84!important;
+  border:3px solid #e7eee9!important;
+  border-radius:8px!important;
+}
+#documentsModal .modal-actions{
+  flex:0 0 auto!important;
+  margin-top:12px!important;
+  padding-top:10px!important;
+  background:var(--paper)!important;
+}
+@media(max-width:850px){
+  #documentsModal .documents-modal{
+    width:calc(100% - 16px)!important;
+    height:85vh!important;
+    height:85dvh!important;
+    max-height:85vh!important;
+    max-height:85dvh!important;
+    padding:22px 14px 16px!important;
+  }
+  #documentsModal #documentList{
+    padding-right:10px!important;
+  }
+}
