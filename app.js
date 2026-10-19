@@ -258,7 +258,7 @@ function navigateToSection(section){
 }
 function navigateFromHash(){const section=window.location.hash.replace(/^#/,'');if(['inicio','avisos','incidencias','chat','documentos','solicitudes'].includes(section))navigateToSection(section);}
 document.querySelectorAll('[data-mark-section]').forEach(button=>button.onclick=()=>markNotificationSectionAsRead(button.dataset.markSection));
-document.querySelectorAll('.mobile-nav [data-section],.side-nav [data-section]').forEach(button=>{
+document.querySelectorAll('.side-nav [data-section]').forEach(button=>{
   const activate=event=>{
     event.preventDefault();
     event.stopPropagation();
@@ -266,6 +266,12 @@ document.querySelectorAll('.mobile-nav [data-section],.side-nav [data-section]')
   };
   button.addEventListener('click',activate,true);
 });
+document.querySelectorAll('.mobile-nav a[data-section="chat"]').forEach(link=>link.addEventListener('click',event=>{
+  if(currentRole==='neighbor'){
+    event.preventDefault();
+    navigateToSection('chat');
+  }
+}));
 window.addEventListener('hashchange',navigateFromHash);
 document.querySelector('#registerForm').onsubmit=async e=>{e.preventDefault(); const form=e.currentTarget; const data=new FormData(form); if(!supabaseClient){showToast('La aplicación no está conectada.');return;} if(!supabaseSession&&!(await startNeighborSession()))return; const password=String(data.get('password')||'').trim(),username=String(data.get('username')||'').trim().toLowerCase(),invite=String(data.get('invite')||invitationCode||'').trim(),phone=String(data.get('phone')||'').trim(); if(password.length<6){showToast('La contraseña debe tener al menos 6 caracteres.');return;} if(neighborInviteState==='approved'){const {data:ok,error}=await supabaseClient.rpc('login_neighbor_account',{p_username:username,p_password:password});if(error||!ok){showToast(error?.message||'El usuario o la contraseña no coinciden.');return;}neighborApproved=true;updateAuthButton();closeModal('registerModal');form.reset();await refreshNeighborProfile();await refreshRemoteDocuments();await refreshRemoteNotices();applyAccessGate();updateChatAccessButtons();await refreshChatNotifications(false);showToast('Sesión iniciada.');return;} let error; if(invite){({error}=await supabaseClient.rpc('claim_neighbor_access_request',{p_invitation_code:invite,p_full_name:String(data.get('name')||'').trim(),p_floor:String(data.get('floor')||'').trim(),p_username:username,p_password:password}));}else{({error}=await supabaseClient.rpc('register_neighbor_account',{p_username:username,p_full_name:String(data.get('name')||'').trim(),p_phone:phone,p_floor:String(data.get('floor')||'').trim(),p_password:password}));}if(error){showToast(`No se pudo enviar la solicitud: ${error.message}`);return;}neighborRequestSent=true;closeModal('registerModal');form.reset();applyAccessGate();showToast('Solicitud enviada. El administrador revisará tus datos.');};
 document.querySelector('#noticeForm').onsubmit=async e=>{e.preventDefault(); const form=e.currentTarget; const data=new FormData(form); if(!supabaseSession||currentRole!=='admin'){showToast('Inicia sesión como administrador para publicar avisos.');return;} const {error}=await supabaseClient.from('community_notices').insert({title:String(data.get('title')).trim(),message:String(data.get('message')).trim(),event_date:data.get('date'),tag:'Nuevo',created_by:supabaseSession.user.id});if(error){showToast(`No se pudo publicar el aviso: ${error.message}`);return;}await refreshRemoteNotices();closeModal('noticeModal');form.reset();showToast('Aviso publicado para toda la comunidad.');};

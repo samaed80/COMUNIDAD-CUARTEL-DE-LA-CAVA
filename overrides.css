@@ -70,6 +70,26 @@
   .calendar-event strong{min-width:0}
 }
 
+/* Los accesos inferiores son enlaces nativos para que funcionen igual en ambos perfiles. */
+@media(max-width:850px){
+  .mobile-nav a{
+    flex:1 1 0!important;
+    min-width:0!important;
+    min-height:48px!important;
+    display:grid!important;
+    place-items:center!important;
+    align-content:center!important;
+    color:#fff!important;
+    font-size:20px!important;
+    line-height:1!important;
+    text-decoration:none!important;
+    touch-action:manipulation!important;
+    -webkit-tap-highlight-color:transparent!important;
+  }
+  .mobile-nav a small{display:block!important;color:#fff!important;font-size:9px!important;margin-top:3px!important}
+  .mobile-nav a .nav-unread-badge{pointer-events:none!important}
+}
+
 /* La portada usa la fotografía real del puente; no mostrar el dibujo SVG. */
 .seville-watermark svg{display:none}
 
