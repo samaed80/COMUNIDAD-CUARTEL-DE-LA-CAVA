@@ -832,3 +832,15 @@
     max-height:calc(100vh - 275px)!important;
   }
 }
+
+
+/* El visor debe quedar por encima de la barra inferior para que no tape documentos. */
+#documentsModal{
+  z-index:50!important;
+  pointer-events:auto!important;
+}
+#documentsModal .documents-modal{
+  position:relative!important;
+  z-index:51!important;
+  margin-bottom:20px!important;
+}
