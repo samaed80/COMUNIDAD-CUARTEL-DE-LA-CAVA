@@ -1109,3 +1109,16 @@ body.documents-viewer-open .mobile-nav{
   .document-accordion-title strong{font-size:12px!important}
   .document-accordion-body .document-open{width:100%!important;min-height:44px!important}
 }
+
+
+/* Confirmaciones de incidencias: siempre visibles por encima de la barra inferior. */
+.toast{
+  z-index:20000!important;
+  bottom:78px!important;
+  max-width:min(92vw,520px)!important;
+  text-align:center!important;
+  pointer-events:none!important;
+}
+@media(max-width:850px){
+  .toast{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important;}
+}
