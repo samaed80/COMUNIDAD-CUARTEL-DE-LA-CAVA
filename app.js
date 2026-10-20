@@ -277,8 +277,12 @@ function navigateToSection(section){
     else item.removeAttribute('aria-current');
   });
   if(section==='chat'){
-    const chatArea=currentRole==='admin'?document.getElementById('solicitudes'):document.querySelector('.resident-card');
-    if(chatArea){
+    if(currentRole==='neighbor'){
+      openNeighborCommunityChat();
+      return;
+    }
+    const chatArea=document.getElementById('solicitudes');
+    if(chatArea&&!chatArea.hidden){
       const topbar=document.querySelector('.topbar');
       const offset=(topbar?.getBoundingClientRect().height||0)+12;
       const top=Math.max(0,chatArea.getBoundingClientRect().top+window.scrollY-offset);
