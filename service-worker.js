@@ -1,4 +1,4 @@
-const CACHE_NAME = "cuartel-de-la-cava-pwa-v47";
+const CACHE_NAME = "cuartel-de-la-cava-pwa-v48";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,8 +6,8 @@ const APP_SHELL = [
   "./overrides.css?v=toast-position-20261020",
   "./access-entry.css?v=5",
   "./navigation-fix.css?v=1",
-  "./notification-overrides.js?v=1",
-  "./app.js?v=processed-counters-final-20261020",
+  "./notification-overrides.js?v=2",
+  "./app.js?v=processed-counters-v2-20261020",
   "./manifest.webmanifest?v=1",
   "./icon.svg?v=3"
 ];
