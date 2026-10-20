@@ -101,6 +101,23 @@ function showIncidentSubmissionStatus(item,errorMessage=''){
   panel.querySelector('[data-retry-incident]')?.addEventListener('click',()=>document.querySelector('#incidentModal')?.querySelector('form')?.requestSubmit());
 }
 function clearIncidentSubmissionStatus(){const panel=document.querySelector('#incidentSubmissionStatus');if(panel){panel.hidden=true;panel.innerHTML='';}}
+function prepareIncidentDialogUi(){
+  const backdrop=document.querySelector('#incidentModal'),card=backdrop?.querySelector('.modal');
+  if(backdrop){backdrop.style.zIndex='1000';backdrop.style.padding='12px';}
+  if(card){card.style.maxHeight='calc(100dvh - 24px)';card.style.overflowY='auto';card.style.paddingBottom='24px';}
+}
+function showIncidentConfirmation(type){
+  const existing=document.querySelector('#incidentSentPopup');existing?.remove();
+  const popup=document.createElement('div');popup.id='incidentSentPopup';popup.setAttribute('role','alertdialog');popup.setAttribute('aria-live','assertive');
+  popup.style.cssText='position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:20px;background:rgba(14,31,34,.58);';
+  const card=document.createElement('div');card.style.cssText='width:min(92vw,400px);padding:26px 22px;border-radius:14px;background:#fff;color:#213a3d;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.32);font-family:Arial,sans-serif;';
+  const title=document.createElement('strong');title.textContent=type.toLowerCase()==='sugerencia'?'Sugerencia enviada':'Incidencia enviada';title.style.cssText='display:block;font-size:20px;color:#28566e;margin-bottom:8px;';
+  const message=document.createElement('p');message.textContent='El mensaje se ha enviado correctamente.';message.style.cssText='margin:0;font-size:14px;line-height:1.45;';
+  card.append(title,message);popup.append(card);document.body.append(popup);
+  popup.addEventListener('click',event=>{if(event.target===popup)popup.remove();});
+  window.setTimeout(()=>popup.remove(),5000);
+}
+prepareIncidentDialogUi();
 function getIncidentAttachments(item){let raw=item?.attachments??item?.photos??item?.images??item?.photo_urls??[];if(typeof raw==='string'){try{raw=JSON.parse(raw);}catch{raw=[];}}if(raw&&typeof raw==='object'&&!Array.isArray(raw)){raw=raw.files||raw.items||raw.photos||raw.attachments||[];}return Array.isArray(raw)?raw:[];}
 function incidentCard(i,index=0){const status=incidentStatusLabels[i.status]||i.status||'Pendiente';const id=escapeHtml(i.id||'');const isHistory=['resolved','cancelled'].includes(String(i.status||'').toLowerCase());const isIncident=String(i.type||'Incidencia').toLowerCase()!=='sugerencia';const failed=i.email_status==='failed';const alreadySent=Boolean(i.sent_at)||i.email_status==='sent';const incidentAttachments=getIncidentAttachments(i);const photoCount=incidentAttachments.length;const incidentSeenKey=String(i.id||'');const incidentSeenList=readSeenIds(String(i.type||'').toLowerCase()==='sugerencia'?'comunidad-seen-suggestions':'comunidad-seen-incidents');const incidentIsUnread=incidentSeenKey&&!incidentSeenList.includes(incidentSeenKey);const noveltyLabel=incidentIsUnread?'<span class="new-label">Novedad</span>':'';const photoButton=isIncident?`<button type="button" class="incident-photo-btn" data-incident-photos="${id}" data-incident-index="${index}">Ver fotos${photoCount?` (${photoCount})`:''}</button>`:'';const adminActions=currentRole==='admin'&&!isHistory&&i.id?`${isIncident&&!alreadySent?`<button type="button" data-incident-email="${id}">${failed?'Reenviar correo':'Enviar correo'}</button>`:''}${i.status!=='reviewed'?`<button type="button" data-incident-status="reviewed" data-incident-id="${id}">Tramitado</button>`:''}<button type="button" data-incident-status="resolved" data-incident-id="${id}">Solucionado</button><button type="button" data-incident-delete="${id}">Eliminar</button>`:'';const actions=(adminActions||photoButton)?`<div class="incident-actions">${photoButton}${adminActions}</div>`:'';const resident=approvedResidents.find(item=>String(item.anonymous_user_id||'')===String(i.created_by||''));const reporter=resident?.full_name||i.reporter_name||i.neighbor_name||i.full_name||i.created_by_name||i.requester_name||i.user_name||(currentRole==='admin'&&supabaseSession?.user?.id&&String(i.created_by)===String(supabaseSession.user.id)?'Administrador de la aplicación':'');const reporterPhone=resident?.phone||i.reporter_phone||i.neighbor_phone||i.phone||'';const reporterFloor=resident?.floor||i.reporter_floor||i.neighbor_floor||i.floor||'';const reporterInfo=currentRole==='admin'&&reporter?'<small class="incident-reporter">Comunica: '+escapeHtml(reporter)+(reporterPhone?' · Teléfono: '+escapeHtml(reporterPhone):'')+(reporterFloor?' · Piso: '+escapeHtml(reporterFloor):'')+'</small>':'';const emailInfo=alreadySent?' · Correo enviado':failed?' · Pendiente de envío':'';return `<article class="incident-card${incidentIsUnread?' is-unread':''}" data-incident-key="${id}" data-incident-type="${escapeHtml(i.type||'')}"><span class="incident-icon">⌁</span><div><h3>${index+1}. ${escapeHtml(i.title)}${noveltyLabel}</h3><p>${escapeHtml(i.message||i.text||'')}${i.location?` · ${escapeHtml(i.location)}`:''}</p><small>${escapeHtml(i.type||'Incidencia')} · ${i.created_at?new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(i.created_at)):escapeHtml(i.text||'')}${emailInfo}</small>${reporterInfo}${failed&&currentRole==='admin'?`<small class="incident-email-error">Error de envío: ${escapeHtml(i.email_error||'No se pudo enviar el correo.')}</small>`:''}${actions}</div><span class="incident-status">${escapeHtml(status)}</span></article>`;}
 async function openIncidentPhotos(incidentId,incidentIndex=-1){
@@ -536,7 +553,7 @@ if(confirmedIncidentForm)confirmedIncidentForm.onsubmit=async event=>{
       confirmed=remoteIncidents.find(item=>String(item.id)===String(incidentId))||confirmed;
     }
     showIncidentSubmissionStatus(confirmed);
-    showToast(type.toLowerCase()==='sugerencia'?'La sugerencia ha sido enviada.':'La incidencia ha sido enviada.');
+    showIncidentConfirmation(type);
     closeModal('incidentModal');
     confirmedIncidentForm.reset();incidentPhotoFiles=[];renderIncidentPhotoList();
     if(type.toLowerCase()==='incidencia'&&!confirmed.sent_at&&confirmed.email_status!=='sent'){
