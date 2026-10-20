@@ -106,7 +106,7 @@ function prepareIncidentDialogUi(){
   if(backdrop){backdrop.style.zIndex='1000';backdrop.style.padding='12px';}
   if(card){card.style.maxHeight='calc(100dvh - 24px)';card.style.overflowY='auto';card.style.paddingBottom='24px';}
 }
-function showIncidentConfirmation(type){
+function showAdminActionPopup(message,title='Acción realizada'){
   document.querySelector('#incidentSentPopup')?.remove();
   const popup=document.createElement('div');
   popup.id='incidentSentPopup';
@@ -115,17 +115,23 @@ function showIncidentConfirmation(type){
   popup.style.cssText='position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-start;justify-content:center;padding:calc(18px + env(safe-area-inset-top,0px)) 16px 24px;background:rgba(14,31,34,.62);';
   const card=document.createElement('div');
   card.style.cssText='width:min(92vw,430px);padding:24px 20px;border-radius:14px;background:#fff;color:#213a3d;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.34);font-family:Arial,sans-serif;border:2px solid #79a98b;';
-  const title=document.createElement('strong');
-  title.textContent=type.toLowerCase()==='sugerencia'?'Sugerencia enviada al administrador':'Incidencia enviada al administrador';
-  title.style.cssText='display:block;font-size:19px;line-height:1.25;color:#28566e;margin-bottom:8px;';
-  const message=document.createElement('p');
-  message.textContent='El mensaje se ha enviado correctamente.';
-  message.style.cssText='margin:0;font-size:14px;line-height:1.45;';
-  card.append(title,message);
+  const heading=document.createElement('strong');
+  heading.textContent=title;
+  heading.style.cssText='display:block;font-size:19px;line-height:1.25;color:#28566e;margin-bottom:8px;';
+  const copy=document.createElement('p');
+  copy.textContent=message;
+  copy.style.cssText='margin:0;font-size:14px;line-height:1.45;';
+  card.append(heading,copy);
   popup.append(card);
   document.body.append(popup);
   const dismiss=()=>{popup.remove();window.removeEventListener('pointerdown',dismiss,true);};
   window.addEventListener('pointerdown',dismiss,true);
+}
+function showIncidentConfirmation(type){
+  showAdminActionPopup(
+    'El mensaje se ha enviado correctamente.',
+    type.toLowerCase()==='sugerencia'?'Sugerencia enviada al administrador':'Incidencia enviada al administrador'
+  );
 }
 prepareIncidentDialogUi();
 function getIncidentAttachments(item){let raw=item?.attachments??item?.photos??item?.images??item?.photo_urls??[];if(typeof raw==='string'){try{raw=JSON.parse(raw);}catch{raw=[];}}if(raw&&typeof raw==='object'&&!Array.isArray(raw)){raw=raw.files||raw.items||raw.photos||raw.attachments||[];}return Array.isArray(raw)?raw:[];}
@@ -134,8 +140,8 @@ async function openIncidentPhotos(incidentId,incidentIndex=-1){
   const sourceIncidents=remoteIncidents.length?remoteIncidents:incidents;
   const item=sourceIncidents.find(entry=>incidentId&&String(entry.id)===String(incidentId))||sourceIncidents[Number(incidentIndex)];
   const attachments=getIncidentAttachments(item);
-  if(!attachments.length){showToast('Esta incidencia no tiene fotos adjuntas.');return;}
-  if(!supabaseClient){showToast('No se pudo conectar con el almacenamiento de fotos.');return;}
+  if(!attachments.length){showAdminActionPopup('Esta incidencia no tiene fotos adjuntas.','Fotos de la incidencia');return;}
+  if(!supabaseClient){showAdminActionPopup('No se pudo conectar con el almacenamiento de fotos.','Fotos de la incidencia');return;}
   const modal=document.querySelector('#incidentPhotosModal');
   const content=document.querySelector('#incidentPhotosModalContent');
   if(modal&&content){modal.hidden=false;content.innerHTML='<p>Abriendo fotos…</p>';}
@@ -204,9 +210,9 @@ async function saveIncidentEmailSetting(enabled){const input=document.querySelec
 function setIncidentButtonsBusy(id,busy){document.querySelectorAll('.incident-actions button').forEach(button=>{const buttonId=button.dataset.incidentId||button.dataset.incidentEmail||button.dataset.incidentDelete;if(String(buttonId)===String(id))button.disabled=busy;});}
 function beginIncidentAction(id){if(incidentActionsInFlight.has(String(id))){showToast('Esta incidencia ya se está procesando. Espera un momento.');return false;}incidentActionsInFlight.add(String(id));setIncidentButtonsBusy(id,true);return true;}
 function endIncidentAction(id){incidentActionsInFlight.delete(String(id));setIncidentButtonsBusy(id,false);}
-async function sendIncidentNow(id){if(!supabaseClient||!supabaseSession||currentRole!=='admin')return;const item=remoteIncidents.find(i=>String(i.id)===String(id));if(!item||String(item.type||'Incidencia').toLowerCase()==='sugerencia'||item.sent_at||item.email_status==='sent')return;if(!beginIncidentAction(id))return;try{await sendIncidentEmail(item,{manual:true});await refreshRemoteIncidents();showToast('Correo enviado. La incidencia sigue pendiente de tramitar.');}catch(error){await refreshRemoteIncidents();showToast(`No se pudo enviar el correo. ${error.message||''}`);}finally{endIncidentAction(id);}}
-async function updateIncidentStatus(id,status){if(!supabaseClient||!supabaseSession||currentRole!=='admin')return;const item=remoteIncidents.find(i=>String(i.id)===String(id));if(!item||!beginIncidentAction(id))return;try{const isIncident=String(item.type||'Incidencia').toLowerCase()!=='sugerencia';const shouldSend=status==='reviewed'&&isIncident&&String(item.status||'pending').toLowerCase()==='pending'&&!item.sent_at&&item.email_status!=='sent';let emailPending=false;if(shouldSend){try{await sendIncidentEmail(item,{manual:true});}catch(error){emailPending=true;await refreshRemoteIncidents();showToast(`El correo no se pudo enviar todavía. La incidencia se tramitará y podrás reenviarlo. ${error.message||''}`);}}const {data,error}=await supabaseClient.from('community_incident_notifications').update({status,updated_at:new Date().toISOString()}).eq('id',id).select('id').maybeSingle();if(error)throw error;if(!data)throw new Error('El servidor no autorizó el cambio o la incidencia ya no existe.');await refreshRemoteIncidents();showToast(shouldSend&&!emailPending?'Incidencia tramitada y correo enviado.':emailPending?'Incidencia tramitada. El correo quedó pendiente y puedes reenviarlo.':`Incidencia marcada como ${incidentStatusLabels[status].toLowerCase()}.`);}catch(error){await refreshRemoteIncidents();showToast(`No se pudo actualizar la incidencia. ${error.message||''}`);}finally{endIncidentAction(id);}}
-async function deleteRemoteIncident(id){if(!supabaseClient||!supabaseSession||currentRole!=='admin')return;if(!window.confirm('¿Quieres eliminar esta incidencia?'))return;if(!beginIncidentAction(id))return;try{const {data,error}=await supabaseClient.from('community_incident_notifications').update({status:'cancelled',updated_at:new Date().toISOString()}).eq('id',id).select('id').maybeSingle();if(error)throw error;if(!data)throw new Error('El servidor no autorizó el cambio o la incidencia ya no existe.');await refreshRemoteIncidents();showToast('Incidencia archivada en el historial.');}catch(error){await refreshRemoteIncidents();showToast(`No se pudo archivar la incidencia. ${error.message||''}`);}finally{endIncidentAction(id);}}
+async function sendIncidentNow(id){if(!supabaseClient||!supabaseSession||currentRole!=='admin')return;const item=remoteIncidents.find(i=>String(i.id)===String(id));if(!item||String(item.type||'Incidencia').toLowerCase()==='sugerencia'||item.sent_at||item.email_status==='sent')return;if(!beginIncidentAction(id))return;try{await sendIncidentEmail(item,{manual:true});await refreshRemoteIncidents();showAdminActionPopup('La incidencia sigue pendiente de tramitar.','Correo enviado');}catch(error){await refreshRemoteIncidents();showAdminActionPopup(`No se pudo enviar el correo. ${error.message||''}`,'Error al enviar el correo');}finally{endIncidentAction(id);}}
+async function updateIncidentStatus(id,status){if(!supabaseClient||!supabaseSession||currentRole!=='admin')return;const item=remoteIncidents.find(i=>String(i.id)===String(id));if(!item||!beginIncidentAction(id))return;try{const isIncident=String(item.type||'Incidencia').toLowerCase()!=='sugerencia';const shouldSend=status==='reviewed'&&isIncident&&String(item.status||'pending').toLowerCase()==='pending'&&!item.sent_at&&item.email_status!=='sent';let emailPending=false;if(shouldSend){try{await sendIncidentEmail(item,{manual:true});}catch(error){emailPending=true;await refreshRemoteIncidents();showAdminActionPopup(`El correo no se pudo enviar todavía. La incidencia se tramitará y podrás reenviarlo. ${error.message||''}`,'Correo pendiente');}}const {data,error}=await supabaseClient.from('community_incident_notifications').update({status,updated_at:new Date().toISOString()}).eq('id',id).select('id').maybeSingle();if(error)throw error;if(!data)throw new Error('El servidor no autorizó el cambio o la incidencia ya no existe.');await refreshRemoteIncidents();showAdminActionPopup(shouldSend&&!emailPending?'Incidencia tramitada y correo enviado.':emailPending?'Incidencia tramitada. El correo quedó pendiente y puedes reenviarlo.':`Incidencia marcada como ${incidentStatusLabels[status].toLowerCase()}.`,'Incidencia actualizada');}catch(error){await refreshRemoteIncidents();showAdminActionPopup(`No se pudo actualizar la incidencia. ${error.message||''}`,'No se pudo actualizar');}finally{endIncidentAction(id);}}
+async function deleteRemoteIncident(id){if(!supabaseClient||!supabaseSession||currentRole!=='admin')return;if(!window.confirm('¿Quieres eliminar esta incidencia?'))return;if(!beginIncidentAction(id))return;try{const {data,error}=await supabaseClient.from('community_incident_notifications').update({status:'cancelled',updated_at:new Date().toISOString()}).eq('id',id).select('id').maybeSingle();if(error)throw error;if(!data)throw new Error('El servidor no autorizó el cambio o la incidencia ya no existe.');await refreshRemoteIncidents();showAdminActionPopup('La incidencia se ha eliminado del listado activo.','Incidencia eliminada');}catch(error){await refreshRemoteIncidents();showAdminActionPopup(`No se pudo archivar la incidencia. ${error.message||''}`,'No se pudo eliminar')}finally{endIncidentAction(id);}}
 async function deleteRemoteNotice(id){if(!supabaseClient||!supabaseSession||currentRole!=='admin')return;const {error}=await supabaseClient.from('community_notices').delete().eq('id',id);if(error){showToast(`No se pudo eliminar el aviso: ${error.message}`);return;}await refreshRemoteNotices();showToast('Aviso eliminado.');}
 async function refreshNeighborAccess(){
   if(!invitationCode||!supabaseClient||!supabaseSession)return;
