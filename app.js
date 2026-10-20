@@ -517,7 +517,7 @@ document.querySelectorAll('[data-close="installModal"]').forEach(button=>button.
 function renderIncidents(){
   const allItems=remoteIncidents.length?remoteIncidents:incidents,terminal=['resolved','cancelled'];
   const active=allItems.filter(i=>!terminal.includes(String(i.status||'pending').toLowerCase()));
-  const visible=currentRole==='admin'?(showIncidentHistory?allItems.filter(i=>terminal.includes(String(i.status||'').toLowerCase())):active):allItems.filter(i=>!terminal.includes(String(i.status||'pending').toLowerCase()));
+  const visible=currentRole==='admin'?(showIncidentHistory?allItems.filter(i=>terminal.includes(String(i.status||'').toLowerCase())):active):allItems.filter(i=>String(i.status||'pending').toLowerCase()==='reviewed');
   const incidentItems=visible.filter(i=>String(i.type||'Incidencia').toLowerCase()!=='sugerencia');
   const suggestionItems=visible.filter(i=>String(i.type||'').toLowerCase()==='sugerencia');
   renderIncidentList(incidentList,incidentItems,showIncidentHistory?'No hay incidencias cerradas en el histórico.':currentRole==='admin'?'Todavía no hay incidencias pendientes.':'Todavía no hay incidencias tramitadas.');
