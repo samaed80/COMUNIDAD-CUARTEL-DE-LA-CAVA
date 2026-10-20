@@ -1163,3 +1163,7 @@ body.documents-viewer-open .mobile-nav{
   color:var(--ink)!important;
 }
 .incident-submission-status.is-popup strong{font-size:15px!important;color:#28566e!important}
+
+/* Última posición del aviso: separado de la barra inferior del móvil. */
+.toast{position:fixed!important;top:88px!important;bottom:auto!important;z-index:20000!important;}
+@media(max-width:850px){.toast{top:82px!important;bottom:auto!important;}}
