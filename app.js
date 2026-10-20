@@ -107,15 +107,25 @@ function prepareIncidentDialogUi(){
   if(card){card.style.maxHeight='calc(100dvh - 24px)';card.style.overflowY='auto';card.style.paddingBottom='24px';}
 }
 function showIncidentConfirmation(type){
-  const existing=document.querySelector('#incidentSentPopup');existing?.remove();
-  const popup=document.createElement('div');popup.id='incidentSentPopup';popup.setAttribute('role','alertdialog');popup.setAttribute('aria-live','assertive');
-  popup.style.cssText='position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:20px;background:rgba(14,31,34,.58);';
-  const card=document.createElement('div');card.style.cssText='width:min(92vw,400px);padding:26px 22px;border-radius:14px;background:#fff;color:#213a3d;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.32);font-family:Arial,sans-serif;';
-  const title=document.createElement('strong');title.textContent=type.toLowerCase()==='sugerencia'?'Sugerencia enviada':'Incidencia enviada';title.style.cssText='display:block;font-size:20px;color:#28566e;margin-bottom:8px;';
-  const message=document.createElement('p');message.textContent='El mensaje se ha enviado correctamente.';message.style.cssText='margin:0;font-size:14px;line-height:1.45;';
-  card.append(title,message);popup.append(card);document.body.append(popup);
-  popup.addEventListener('click',event=>{if(event.target===popup)popup.remove();});
-  window.setTimeout(()=>popup.remove(),5000);
+  document.querySelector('#incidentSentPopup')?.remove();
+  const popup=document.createElement('div');
+  popup.id='incidentSentPopup';
+  popup.setAttribute('role','alertdialog');
+  popup.setAttribute('aria-live','assertive');
+  popup.style.cssText='position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-start;justify-content:center;padding:calc(18px + env(safe-area-inset-top,0px)) 16px 24px;background:rgba(14,31,34,.62);';
+  const card=document.createElement('div');
+  card.style.cssText='width:min(92vw,430px);padding:24px 20px;border-radius:14px;background:#fff;color:#213a3d;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.34);font-family:Arial,sans-serif;border:2px solid #79a98b;';
+  const title=document.createElement('strong');
+  title.textContent=type.toLowerCase()==='sugerencia'?'Sugerencia enviada al administrador':'Incidencia enviada al administrador';
+  title.style.cssText='display:block;font-size:19px;line-height:1.25;color:#28566e;margin-bottom:8px;';
+  const message=document.createElement('p');
+  message.textContent='El mensaje se ha enviado correctamente.';
+  message.style.cssText='margin:0;font-size:14px;line-height:1.45;';
+  card.append(title,message);
+  popup.append(card);
+  document.body.append(popup);
+  const dismiss=()=>{popup.remove();window.removeEventListener('pointerdown',dismiss,true);};
+  window.addEventListener('pointerdown',dismiss,true);
 }
 prepareIncidentDialogUi();
 function getIncidentAttachments(item){let raw=item?.attachments??item?.photos??item?.images??item?.photo_urls??[];if(typeof raw==='string'){try{raw=JSON.parse(raw);}catch{raw=[];}}if(raw&&typeof raw==='object'&&!Array.isArray(raw)){raw=raw.files||raw.items||raw.photos||raw.attachments||[];}return Array.isArray(raw)?raw:[];}
