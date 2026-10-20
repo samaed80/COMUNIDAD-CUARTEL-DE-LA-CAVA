@@ -536,6 +536,7 @@ if(confirmedIncidentForm)confirmedIncidentForm.onsubmit=async event=>{
       confirmed=remoteIncidents.find(item=>String(item.id)===String(incidentId))||confirmed;
     }
     showIncidentSubmissionStatus(confirmed);
+    showToast(type.toLowerCase()==='sugerencia'?'La sugerencia ha sido enviada.':'La incidencia ha sido enviada.');
     closeModal('incidentModal');
     confirmedIncidentForm.reset();incidentPhotoFiles=[];renderIncidentPhotoList();
     if(type.toLowerCase()==='incidencia'&&!confirmed.sent_at&&confirmed.email_status!=='sent'){
