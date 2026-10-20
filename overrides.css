@@ -1147,3 +1147,19 @@ body.documents-viewer-open .mobile-nav{
   .incident-submission-status{margin-bottom:14px;padding:12px}
   .incident-status{grid-column:2;justify-self:start;margin-top:4px}
 }
+
+/* Confirmación visible tras enviar una incidencia o sugerencia. */
+.incident-submission-status.is-popup{
+  position:fixed!important;
+  top:50%!important;
+  left:50%!important;
+  z-index:1001!important;
+  width:min(90vw,420px)!important;
+  margin:0!important;
+  transform:translate(-50%,-50%)!important;
+  box-shadow:0 18px 50px rgba(23,52,58,.25)!important;
+  border:2px solid #79a98b!important;
+  background:#fff!important;
+  color:var(--ink)!important;
+}
+.incident-submission-status.is-popup strong{font-size:15px!important;color:#28566e!important}
