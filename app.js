@@ -384,7 +384,7 @@ async function uploadIncidentPhotos(incidentId,files){
     if(error)throw new Error(`No se pudo subir la foto «${originalFile.name}»: ${error.message}`);
     uploaded.push({path,name:originalFile.name,type:file.type,size:file.size});
   }
-  const {error}=await supabaseClient.from('community_incident_notifications').update({attachments:uploaded}).eq('id',incidentId);
+  const {error}=await supabaseClient.rpc('save_incident_attachments',{p_incident_id:incidentId,p_attachments:uploaded});
   if(error)throw new Error(`No se pudieron guardar las fotos: ${error.message}`);
   return uploaded;
 }
