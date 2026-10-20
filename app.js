@@ -96,7 +96,7 @@ function ensureIncidentSubmissionStatus(){
 function showIncidentSubmissionStatus(item,errorMessage=''){
   const panel=ensureIncidentSubmissionStatus();if(!panel)return;
   const isError=Boolean(errorMessage),type=String(item?.type||'Incidencia').toLowerCase()==='sugerencia'?'sugerencia':'incidencia';
-  panel.hidden=false;panel.className=`incident-submission-status ${isError?'is-error':'is-sent'}`;
+  panel.hidden=false;panel.className=`incident-submission-status ${isError?'is-error':'is-sent'}${isError?'':' is-popup'}`;
   panel.innerHTML=isError?`<span class="submission-status-symbol" aria-hidden="true">!</span><div><strong>Error de envío</strong><p>${escapeHtml(errorMessage)}</p><button type="button" class="secondary-btn" data-retry-incident>Reintentar</button></div>`:`<span class="submission-status-symbol" aria-hidden="true">✓</span><div><strong>${type[0].toUpperCase()+type.slice(1)} enviada al administrador</strong><p>Recibida el ${incidentDate(item?.created_at||new Date())}. Estado: <b>${escapeHtml(incidentStatusMeta(item).label)}</b>.</p><p>Referencia: <code>${escapeHtml(item?.id||'pendiente')}</code></p></div>`;
   panel.querySelector('[data-retry-incident]')?.addEventListener('click',()=>document.querySelector('#incidentModal')?.querySelector('form')?.requestSubmit());
 }
