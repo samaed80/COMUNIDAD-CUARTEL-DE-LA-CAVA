@@ -513,7 +513,7 @@ function openShareModal(){
 }
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;if(installAppBtn)installAppBtn.hidden=false;});
 installAppBtn?.addEventListener('click',async()=>{if(deferredInstallPrompt){deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installAppBtn.hidden=true;}else openInstallModal();});
-shareAppBtn?.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:'Comunidad Cuartel de la Cava',url:appShareUrl});showToast('Enlace preparado para compartir.');return;}catch(error){if(error?.name==='AbortError')return;}}openShareModal();showToast('Enlace listo para compartir.');});
+shareAppBtn?.addEventListener('click',async()=>{showToast('Preparando enlace para compartir…');if(navigator.share){try{await navigator.share({title:'Comunidad Cuartel de la Cava',url:appShareUrl});showToast('Enlace preparado para compartir.');return;}catch(error){if(error?.name==='AbortError')return;}}openShareModal();showToast('Enlace listo para compartir.');});
 document.querySelector('#copyShareLinkBtn')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(appShareUrl);showToast('Enlace copiado.');}catch(e){shareAppLink?.select();document.execCommand('copy');showToast('Enlace copiado.');}});
 document.querySelectorAll('[data-close="installModal"]').forEach(button=>button.addEventListener('click',()=>{if(installModal)installModal.hidden=true;}));
 
