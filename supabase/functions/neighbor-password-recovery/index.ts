@@ -20,6 +20,7 @@ Deno.serve(async (request) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const resendKey = Deno.env.get("RESEND_API_KEY");
   const sender = Deno.env.get("RESEND_FROM_EMAIL");
+  const appOrigin = request.headers.get("origin") || "";
   if (!supabaseUrl || !serviceRoleKey || !resendKey || !sender) {
     return response({ error: "El servicio de recuperación no está configurado." }, 500);
   }
@@ -47,6 +48,9 @@ Deno.serve(async (request) => {
           p_code: code,
         });
         if (storeError) throw storeError;
+        const recoveryLink = appOrigin
+          ? appOrigin + "/?recuperar=1&recuperar_email=" + encodeURIComponent(email) + "&codigo=" + encodeURIComponent(code)
+          : "";
         const mail = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
@@ -54,7 +58,7 @@ Deno.serve(async (request) => {
             from: sender,
             to: [email],
             subject: "Código para recuperar tu acceso",
-            html: `<p>Tu código para recuperar el acceso a Comunidad Cuartel de la Cava es:</p><p style="font-size:28px;font-weight:700;letter-spacing:4px">${code}</p><p>Caduca en 10 minutos y solo puede utilizarse una vez.</p>`,
+            html: `<p>Tu código para recuperar el acceso a Comunidad Cuartel de la Cava es:</p><p style="font-size:28px;font-weight:700;letter-spacing:4px">${code}</p><p>Caduca en 10 minutos y solo puede utilizarse una vez.</p>${recoveryLink ? `<p><a href="${recoveryLink}">Abrir recuperación y elegir una contraseña nueva</a></p>` : ""}`,
           }),
         });
         if (!mail.ok) throw new Error(`Resend: ${await mail.text()}`);
