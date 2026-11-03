@@ -863,3 +863,36 @@
   max-height:none !important;
   overflow:visible !important;
 }
+
+/* Carrusel de avisos de la portada. */
+.notice-carousel{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+}
+.notice-carousel .notice-list{min-width:0;width:100%;}
+.notice-carousel-arrow{
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border:1px solid var(--line);
+  border-radius:50%;
+  background:#fff;
+  color:var(--navy);
+  font:600 25px/1 var(--sans);
+}
+.notice-carousel-arrow:hover{background:var(--mint);border-color:#b8d0c0;}
+.notice-carousel-arrow[hidden]{display:none;}
+.notice-carousel-status{
+  min-height:18px;
+  margin-top:8px;
+  text-align:center;
+  color:var(--muted);
+  font-size:10px;
+}
+@media(max-width:600px){
+  .notice-carousel{gap:6px;}
+  .notice-carousel-arrow{width:30px;height:30px;font-size:22px;}
+}
