@@ -114,7 +114,7 @@ incidentCard=function(i,index=0){
   const html=baseIncidentCard(i,index);
   if(currentRole!=='neighbor'||String(i.status||'').toLowerCase()!=='reviewed')return html;
   const reporter=incidentReporter(i);
-  const reporterLine='<small class="incident-reporter">Usuario: '+escapeHtml(reporter.username)+' · Teléfono: '+escapeHtml(reporter.phone)+' · Piso: '+escapeHtml(reporter.floor)+'</small>';
+  const reporterLine='<small class="incident-reporter">Usuario: '+escapeHtml(reporter.username)+' · Piso: '+escapeHtml(reporter.floor)+'</small>';
   const floorLine=/<small class="incident-reporter">Piso que comunica:[\s\S]*?<\/small>/;
   return floorLine.test(html)?html.replace(floorLine,reporterLine):html.replace('</div><span class="incident-status">',reporterLine+'</div><span class="incident-status">');
 };
