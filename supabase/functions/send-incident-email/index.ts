@@ -6,6 +6,13 @@ const allowedOrigins = new Set([
   "http://127.0.0.1:8000",
 ]);
 
+const incidentSenderEmail = "cuarteldelacava@gmail.com";
+const incidentRecipientEmails = [
+  "cuarteldelacava@gmail.com",
+  "gestion@proedyo.com",
+];
+const incidentRecipientList = incidentRecipientEmails.join(", ");
+
 function response(body: unknown, status: number, origin: string | null) {
   const headers = new Headers({ "Content-Type": "application/json", "Vary": "Origin" });
   if (origin && allowedOrigins.has(origin)) {
@@ -69,7 +76,7 @@ Deno.serve(async (request) => {
       .update({
         email_status: "failed",
         email_error: "El intento anterior quedó interrumpido; se puede reenviar.",
-        recipient_email: "santamariamata@gmail.com",
+        recipient_email: incidentRecipientList,
         updated_at: new Date().toISOString(),
       })
       .eq("id", incidentId)
@@ -133,7 +140,7 @@ Deno.serve(async (request) => {
   // Reserva atómica: evita que el automático y el botón de tramitación envíen duplicados.
   const { data: claim, error: claimError } = await adminClient
     .from("community_incident_notifications")
-    .update({ email_status: "sending", email_error: null, recipient_email: "santamariamata@gmail.com", updated_at: new Date().toISOString() })
+    .update({ email_status: "sending", email_error: null, recipient_email: incidentRecipientList, updated_at: new Date().toISOString() })
     .eq("id", incidentId)
     .in("email_status", ["not_sent", "failed"])
     .is("sent_at", null)
@@ -149,26 +156,35 @@ Deno.serve(async (request) => {
   }
 
   const attachments = [];
-  for (const item of (Array.isArray(savedIncident.attachments) ? savedIncident.attachments : [])) {
-    const path = String(item?.path || '').trim();
-    if (!path) continue;
-    const { data: fileBlob, error: fileError } = await adminClient.storage.from("incident-photos").download(path);
-    if (fileError || !fileBlob) {
-      const message = fileError?.message || "No se pudo descargar la foto.";
-      console.error("incident-photo-download", { incidentId, path, error: message });
-      throw new Error(`No se pudo adjuntar la foto «${String(item?.name || path)}»: ${message}`);
+  try {
+    for (const item of (Array.isArray(savedIncident.attachments) ? savedIncident.attachments : [])) {
+      const path = String(item?.path || '').trim();
+      if (!path) continue;
+      const { data: fileBlob, error: fileError } = await adminClient.storage.from("incident-photos").download(path);
+      if (fileError || !fileBlob) {
+        const message = fileError?.message || "No se pudo descargar la foto.";
+        console.error("incident-photo-download", { incidentId, path, error: message });
+        throw new Error(`No se pudo adjuntar la foto «${String(item?.name || path)}»: ${message}`);
+      }
+      const bytes = new Uint8Array(await fileBlob.arrayBuffer());
+      let binary = "";
+      const chunkSize = 0x8000;
+      for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)));
+      }
+      attachments.push({
+        filename: String(item?.name || "foto"),
+        mimeType: String(item?.type || "application/octet-stream"),
+        content: btoa(binary),
+      });
     }
-    const bytes = new Uint8Array(await fileBlob.arrayBuffer());
-    let binary = "";
-    const chunkSize = 0x8000;
-    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-      binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)));
-    }
-    attachments.push({
-      filename: String(item?.name || "foto"),
-      mimeType: String(item?.type || "application/octet-stream"),
-      content: btoa(binary),
-    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "No se pudo preparar la foto para el correo.";
+    await adminClient.from("community_incident_notifications").update({
+      email_status: "failed", email_error: errorMessage.slice(0, 1000), sent_at: null,
+      recipient_email: incidentRecipientList, updated_at: new Date().toISOString(),
+    }).eq("id", incidentId);
+    return response({ ok: false, error: errorMessage }, 502, origin);
   }
 
   try {
@@ -179,10 +195,11 @@ Deno.serve(async (request) => {
         secret: webhookSecret,
         action: "tramitado",
         type: "Incidencia",
-        sender_email: "cuarteldelacava@gmail.com",
-        recipient_email: "santamariamata@gmail.com",
-        from: "cuarteldelacava@gmail.com",
-        to: "santamariamata@gmail.com",
+        sender_email: incidentSenderEmail,
+        recipient_email: incidentRecipientList,
+        recipients: incidentRecipientEmails,
+        from: incidentSenderEmail,
+        to: incidentRecipientList,
         subject,
         title,
         message: body,
@@ -201,7 +218,7 @@ Deno.serve(async (request) => {
     const result = await mailResponse.json().catch(() => null);
     if (!mailResponse.ok || !result?.ok) throw new Error(String(result?.error || `El servicio de correo rechazó la incidencia (HTTP ${mailResponse.status}).`));
     const { error: finalizeError } = await adminClient.from("community_incident_notifications").update({
-      email_status: "sent", email_error: null, sent_at: new Date().toISOString(), recipient_email: "santamariamata@gmail.com",
+      email_status: "sent", email_error: null, sent_at: new Date().toISOString(), recipient_email: incidentRecipientList,
     }).eq("id", incidentId);
     if (finalizeError) {
       console.error("incident-email-finalize", { incidentId, error: finalizeError.message });
@@ -213,7 +230,7 @@ Deno.serve(async (request) => {
     console.error("incident-email-send", { incidentId, error: errorMessage });
     const { error: failureUpdateError } = await adminClient.from("community_incident_notifications").update({
       email_status: "failed", email_error: errorMessage.slice(0, 1000), sent_at: null,
-      recipient_email: "santamariamata@gmail.com", updated_at: new Date().toISOString(),
+      recipient_email: incidentRecipientList, updated_at: new Date().toISOString(),
     }).eq("id", incidentId);
     if (failureUpdateError) console.error("incident-email-failure-state", { incidentId, error: failureUpdateError.message });
     return response({ ok: false, error: errorMessage }, 502, origin);
