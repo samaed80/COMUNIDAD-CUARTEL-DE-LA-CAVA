@@ -70,6 +70,47 @@
   .calendar-event strong{min-width:0}
 }
 
+/* Lectura cómoda en móvil: ningún modal ni documento puede desbordar la pantalla. */
+@media (max-width:850px){
+  html,body{max-width:100%;overflow-x:hidden}
+  .modal-backdrop{align-items:flex-start;overflow-y:auto;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+  .modal{width:100%;max-width:520px;max-height:calc(100dvh - 20px);overflow-y:auto;overflow-x:hidden;margin:auto;padding:24px 16px 18px;border-radius:14px}
+  .modal h2{font-size:29px;line-height:1.05;padding-right:28px;overflow-wrap:anywhere}
+  .modal-intro{font-size:12px;line-height:1.5;margin-bottom:14px}
+  .modal-close{right:10px;top:8px;min-width:40px;min-height:40px;padding:6px;font-size:24px}
+  .modal label{margin:11px 0;font-size:11px}
+  .modal input,.modal textarea,.modal select{max-width:100%;font-size:16px;padding:10px}
+  .modal textarea{min-height:90px}
+  .modal-actions{display:flex;flex-wrap:wrap;justify-content:stretch;gap:8px;margin-top:16px}
+  .modal-actions>*{flex:1 1 140px;min-width:0;min-height:42px}
+
+  .documents-modal{display:flex;flex-direction:column;overflow:hidden;padding-bottom:12px}
+  .documents-modal .document-tabs{display:flex;gap:7px;max-width:100%;overflow-x:auto;overflow-y:hidden;padding:2px 1px 8px;scrollbar-width:thin}
+  .documents-modal .document-tab{flex:0 0 auto;white-space:nowrap;min-height:40px;padding:9px 11px;font-size:11px}
+  .documents-modal .modal-intro{flex:0 0 auto}
+  .documents-modal .document-list{min-height:90px;max-height:calc(100dvh - 290px);overflow-y:auto;overflow-x:hidden;padding:1px 2px 4px;-webkit-overflow-scrolling:touch}
+  .document-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:9px;align-items:start;width:100%;padding:12px 8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .document-row+.document-row{margin-top:8px}
+  .document-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--mint);color:var(--navy);font-size:17px}
+  .document-row>div{min-width:0}
+  .document-row strong,.document-row small,.document-description{display:block;max-width:100%;overflow-wrap:anywhere;word-break:break-word;line-height:1.35}
+  .document-row strong{font-size:13px}
+  .document-row small{margin-top:3px;color:var(--muted);font-size:10px}
+  .document-description{margin-top:5px;color:var(--ink);font-size:11px}
+  .document-open,.document-remove,.document-save-description{display:grid;place-items:center;min-width:38px;min-height:38px;padding:6px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);font-weight:700}
+  .document-remove{color:#b14e3d}
+  .document-description-edit{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin-top:7px}
+  .document-description-edit input{min-width:0;margin:0;font-size:14px;padding:8px}
+  .document-description-edit button{min-width:72px;min-height:38px;padding:7px;font-size:10px}
+
+  .community-chat-modal{max-height:calc(100dvh - 20px);overflow:hidden}
+  .community-chat-messages{min-height:120px;max-height:none;height:clamp(170px,42dvh,360px);padding:10px;overflow-y:auto;overflow-x:hidden}
+  .chat-message{max-width:92%;padding:9px 10px}
+  .chat-message p{font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+  .community-chat-modal form{flex:0 0 auto;margin-top:10px}
+  .community-chat-modal form textarea{min-height:72px;max-height:120px}
+}
+
 /* Los accesos inferiores son enlaces nativos para que funcionen igual en ambos perfiles. */
 @media(max-width:850px){
   .mobile-nav a{
@@ -646,7 +687,17 @@
 }
 .mobile-nav a .nav-icon{display:block!important;font:23px/1 Arial,sans-serif!important}
 .mobile-nav a small{display:block!important;color:#fff!important;font:700 9px/1 var(--sans)!important;margin-top:3px!important;white-space:nowrap!important}
-.mobile-nav a .nav-unread-badge{pointer-events:none!important}
+.mobile-nav a{position:relative!important}
+.mobile-nav a .nav-unread-badge{pointer-events:none!important;position:absolute!important;top:1px!important;left:50%!important;right:auto!important;transform:translateX(10px)!important;margin:0!important;z-index:2!important;min-width:16px!important;height:16px!important;padding:0 4px!important;border-radius:999px!important;display:grid!important;place-items:center!important;background:#f4c95d!important;color:#173d3d!important;font:700 9px/1 Arial,sans-serif!important;box-sizing:border-box!important}
+.mobile-nav a .nav-unread-badge[hidden]{display:none!important}
+
+/* La navegación inferior es solo móvil. En escritorio no debe tapar los modales. */
+@media(min-width:851px){
+  .mobile-nav{display:none!important}
+}
+
+/* Los modales deben quedar por encima de cualquier navegación fija. */
+.modal-backdrop{z-index:1000!important}
 
 /* El aviso flotante es solo informativo y no debe interceptar la navegación. */
 .toast{pointer-events:none!important}
@@ -722,448 +773,49 @@
   #incidentModal .modal-actions{position:sticky;bottom:-19px;margin:13px -17px -19px;padding:10px 17px 19px;background:var(--paper);z-index:2}
   #incidentModal .modal-actions button{padding:9px 11px;font-size:11px}
 }
-/* Corrección responsive de documentos, chat y modales. */
-.document-list{display:grid;gap:10px;min-width:0}.document-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff}.document-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:var(--mint);color:var(--navy);font-size:18px}.document-row>div{min-width:0}.document-row strong,.document-row small,.document-description{display:block;overflow-wrap:anywhere;word-break:break-word;line-height:1.4}.document-row strong{font-size:13px}.document-row small{margin-top:3px;color:var(--muted);font-size:10px}.document-description{margin-top:5px;font-size:11px}.document-open,.document-remove,.document-save-description{display:grid;place-items:center;min-width:38px;min-height:38px;padding:6px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);font-weight:700}.document-remove{color:#b14e3d}.document-description-edit{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;margin-top:8px}.document-description-edit input{min-width:0;margin:0}.document-description-edit button{min-height:38px}
-@media(max-width:850px){html,body{max-width:100%;overflow-x:hidden}.modal-backdrop{align-items:flex-start;overflow-y:auto;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}.modal{width:100%;max-width:520px;max-height:calc(100dvh - 20px);overflow-y:aut
 
+/* Base de documentos: tarjetas legibles también fuera del móvil. */
+.document-list{display:grid;gap:10px;min-width:0}
+.document-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.document-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:var(--mint);color:var(--navy);font-size:18px}
+.document-row>div{min-width:0}
+.document-row strong,.document-row small,.document-description{display:block;overflow-wrap:anywhere;word-break:break-word;line-height:1.4}
+.document-row strong{font-size:13px}.document-row small{margin-top:3px;color:var(--muted);font-size:10px}.document-description{margin-top:5px;font-size:11px}
+.document-open,.document-remove,.document-save-description{display:grid;place-items:center;min-width:38px;min-height:38px;padding:6px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);font-weight:700}
+.document-remove{color:#b14e3d}
+.document-description-edit{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;margin-top:8px}.document-description-edit input{min-width:0;margin:0}.document-description-edit button{min-height:38px}
 
-/* Base estable: ventana de documentos completamente navegable. */
-.modal-backdrop{overflow-y:auto;overflow-x:hidden;}
-.documents-modal{max-height:calc(100dvh - 32px);overflow-y:auto;overflow-x:hidden;}
-.documents-modal .document-list{min-height:90px;max-height:none;overflow:visible;}
-@media(max-width:850px){
-  .modal-backdrop{align-items:flex-start;}
-  .documents-modal{width:100%;max-height:calc(100dvh - 20px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
-  .documents-modal .document-list{max-height:none;overflow:visible;}
+/* Última capa responsive para documentos, chat y todos los modales. */
+@media (max-width:850px){
+  html,body{max-width:100%;overflow-x:hidden}
+  .modal-backdrop{align-items:flex-start;overflow-y:auto;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+  .modal{width:100%;max-width:520px;max-height:calc(100dvh - 20px);overflow-y:auto;overflow-x:hidden;margin:auto;padding:24px 16px 18px;border-radius:14px}
+  .modal h2{font-size:29px;line-height:1.05;padding-right:28px;overflow-wrap:anywhere}
+  .modal-close{right:10px;top:8px;min-width:40px;min-height:40px;padding:6px;font-size:24px}
+  .modal input,.modal textarea,.modal select{max-width:100%;font-size:16px;padding:10px}
+  .modal-actions{display:flex;flex-wrap:wrap;justify-content:stretch;gap:8px;margin-top:16px}
+  .modal-actions>*{flex:1 1 140px;min-width:0;min-height:42px}
+  .documents-modal{display:flex;flex-direction:column;overflow:hidden;padding-bottom:12px}
+  .documents-modal .document-tabs{display:flex;gap:7px;max-width:100%;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:thin}
+  .documents-modal .document-tab{flex:0 0 auto;white-space:nowrap;min-height:40px;padding:9px 11px;font-size:11px}
+  .documents-modal .document-list{min-height:90px;max-height:calc(100dvh - 290px);overflow-y:auto;overflow-x:hidden;padding:1px 2px 4px;-webkit-overflow-scrolling:touch}
+  .document-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:9px;align-items:start;width:100%;padding:12px 8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .document-row+.document-row{margin-top:8px}
+  .document-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--mint);color:var(--navy);font-size:17px}
+  .document-row>div{min-width:0}
+  .document-row strong,.document-row small,.document-description{display:block;max-width:100%;overflow-wrap:anywhere;word-break:break-word;line-height:1.35}
+  .document-row strong{font-size:13px}
+  .document-row small{margin-top:3px;color:var(--muted);font-size:10px}
+  .document-description{margin-top:5px;color:var(--ink);font-size:11px}
+  .document-open,.document-remove,.document-save-description{display:grid;place-items:center;min-width:38px;min-height:38px;padding:6px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);font-weight:700}
+  .document-remove{color:#b14e3d}
+  .document-description-edit{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin-top:7px}
+  .document-description-edit input{min-width:0;margin:0;font-size:14px;padding:8px}
+  .document-description-edit button{min-width:72px;min-height:38px;padding:7px;font-size:10px}
+  .community-chat-modal{max-height:calc(100dvh - 20px);overflow:hidden}
+  .community-chat-messages{min-height:120px;max-height:none;height:clamp(170px,42dvh,360px);padding:10px;overflow-y:auto;overflow-x:hidden}
+  .chat-message{max-width:92%;padding:9px 10px}
+  .chat-message p{font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+  .community-chat-modal form{flex:0 0 auto;margin-top:10px}
+  .community-chat-modal form textarea{min-height:72px;max-height:120px}
 }
-
-
-/* Desplazamiento definitivo del visor de documentos. */
-.documents-modal{
-  height:auto!important;
-  max-height:calc(100dvh - 32px)!important;
-  overflow-y:scroll!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain;
-  touch-action:pan-y;
-}
-.documents-modal .document-list{
-  height:auto!important;
-  max-height:none!important;
-  overflow:visible!important;
-}
-@media(max-width:850px){
-  .modal-backdrop{overflow-y:auto!important;}
-  .documents-modal{max-height:calc(100dvh - 20px)!important;}
-}
-
-
-/* Visor de documentos: lista desplazable independiente en escritorio y móvil. */
-.documents-modal{display:flex!important;flex-direction:column!important;min-height:0!important;}
-.documents-modal .document-list{flex:1 1 auto!important;min-height:0!important;max-height:calc(100dvh - 270px)!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
-@media(max-width:850px){.documents-modal .document-list{max-height:calc(100dvh - 290px)!important;}}
-
-
-/* Visor de documentos: altura explícita para garantizar scroll en navegadores de escritorio. */
-.documents-modal{max-height:calc(100vh - 32px)!important;max-height:calc(100dvh - 32px)!important;}
-.documents-modal .document-list{
-  flex:0 1 auto!important;
-  height:calc(100vh - 300px)!important;
-  height:calc(100dvh - 300px)!important;
-  min-height:180px!important;
-  max-height:calc(100vh - 300px)!important;
-  max-height:calc(100dvh - 300px)!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-  -webkit-overflow-scrolling:touch!important;
-  scrollbar-gutter:stable;
-  padding-bottom:14px!important;
-}
-@media(max-width:850px){
-  .documents-modal .document-list{
-    height:calc(100vh - 290px)!important;
-    height:calc(100dvh - 290px)!important;
-    max-height:calc(100vh - 290px)!important;
-    max-height:calc(100dvh - 290px)!important;
-  }
-}
-
-
-/* Correccion final: el scroll pertenece exclusivamente al listado de documentos. */
-#documentsModal .documents-modal{
-  display:flex!important;
-  flex-direction:column!important;
-  box-sizing:border-box!important;
-  height:calc(100vh - 32px)!important;
-  height:calc(100dvh - 32px)!important;
-  max-height:calc(100vh - 32px)!important;
-  max-height:calc(100dvh - 32px)!important;
-  overflow:hidden!important;
-  min-height:0!important;
-}
-#documentsModal #documentList{
-  display:block!important;
-  box-sizing:border-box!important;
-  width:100%!important;
-  flex:0 0 auto!important;
-  height:calc(100vh - 300px)!important;
-  height:calc(100dvh - 300px)!important;
-  min-height:120px!important;
-  max-height:calc(100vh - 300px)!important;
-  max-height:calc(100dvh - 300px)!important;
-  overflow-y:scroll!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-  touch-action:pan-y!important;
-  -webkit-overflow-scrolling:touch!important;
-  padding-bottom:18px!important;
-}
-@media(max-width:850px){
-  #documentsModal .documents-modal{
-    height:calc(100vh - 20px)!important;
-    height:calc(100dvh - 20px)!important;
-    max-height:calc(100vh - 20px)!important;
-    max-height:calc(100dvh - 20px)!important;
-  }
-  #documentsModal #documentList{
-    height:calc(100vh - 275px)!important;
-    height:calc(100dvh - 275px)!important;
-    max-height:calc(100vh - 275px)!important;
-  }
-}
-
-
-/* El visor debe quedar por encima de la barra inferior para que no tape documentos. */
-#documentsModal{
-  z-index:50!important;
-  pointer-events:auto!important;
-}
-#documentsModal .documents-modal{
-  position:relative!important;
-  z-index:51!important;
-  margin-bottom:20px!important;
-}
-
-
-/* Corrección definitiva de capas: el visor nunca queda debajo de la navegación fija. */
-#documentsModal{
-  z-index:1000!important;
-}
-#documentsModal .documents-modal{
-  z-index:1001!important;
-}
-
-
-/* Visor de documentos: pantalla completa desplazable, compatible con Safari, Chrome y móvil. */
-#documentsModal{
-  position:fixed!important;
-  inset:0!important;
-  display:block!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  padding:12px!important;
-  z-index:1000!important;
-  -webkit-overflow-scrolling:touch!important;
-  overscroll-behavior:contain!important;
-}
-#documentsModal .documents-modal{
-  width:min(720px,100%)!important;
-  max-width:720px!important;
-  height:auto!important;
-  min-height:calc(100dvh - 24px)!important;
-  max-height:none!important;
-  margin:0 auto!important;
-  overflow:visible!important;
-  padding-bottom:120px!important;
-}
-#documentsModal #documentList{
-  height:auto!important;
-  min-height:0!important;
-  max-height:none!important;
-  overflow:visible!important;
-  padding-bottom:24px!important;
-}
-@media(max-width:850px){
-  #documentsModal{padding:8px 8px 90px!important;}
-  #documentsModal .documents-modal{
-    width:100%!important;
-    min-height:calc(100dvh - 16px)!important;
-    padding:22px 14px 120px!important;
-  }
-}
-
-
-/* El visor de documentos tiene una capa exclusiva: nada puede taparlo ni capturar el desplazamiento. */
-html.documents-viewer-open,
-body.documents-viewer-open{
-  overflow:hidden!important;
-}
-body.documents-viewer-open .mobile-nav{
-  display:none!important;
-}
-#documentsModal{
-  position:fixed!important;
-  inset:0!important;
-  display:block!important;
-  padding:0!important;
-  overflow-y:scroll!important;
-  overflow-x:hidden!important;
-  z-index:10000!important;
-  touch-action:pan-y!important;
-  -webkit-overflow-scrolling:touch!important;
-}
-#documentsModal .documents-modal{
-  position:relative!important;
-  width:min(760px,calc(100% - 24px))!important;
-  max-width:760px!important;
-  min-height:calc(100dvh - 24px)!important;
-  height:auto!important;
-  max-height:none!important;
-  margin:12px auto!important;
-  overflow:visible!important;
-  padding:28px 24px 150px!important;
-}
-#documentsModal #documentList{
-  display:block!important;
-  height:auto!important;
-  min-height:0!important;
-  max-height:none!important;
-  overflow:visible!important;
-  padding-bottom:30px!important;
-}
-#documentsModal .document-row{
-  width:100%!important;
-  margin-bottom:10px!important;
-}
-@media(max-width:850px){
-  #documentsModal .documents-modal{
-    width:calc(100% - 16px)!important;
-    min-height:calc(100dvh - 16px)!important;
-    margin:8px auto!important;
-    padding:24px 14px 150px!important;
-  }
-}
-
-
-/* Visor de documentos: barra vertical visible y lista independiente. */
-#documentsModal .documents-modal{
-  display:flex!important;
-  flex-direction:column!important;
-  width:min(760px,calc(100% - 24px))!important;
-  height:85vh!important;
-  height:85dvh!important;
-  min-height:0!important;
-  max-height:85vh!important;
-  max-height:85dvh!important;
-  margin:auto!important;
-  overflow:hidden!important;
-}
-#documentsModal #documentList{
-  display:block!important;
-  flex:1 1 auto!important;
-  width:100%!important;
-  min-height:0!important;
-  height:auto!important;
-  max-height:none!important;
-  overflow-y:scroll!important;
-  overflow-x:hidden!important;
-  scrollbar-width:auto!important;
-  scrollbar-color:#6b8d84 #e7eee9!important;
-  -webkit-overflow-scrolling:touch!important;
-  overscroll-behavior:contain!important;
-  touch-action:pan-y!important;
-  padding:2px 12px 28px 2px!important;
-}
-#documentsModal #documentList::-webkit-scrollbar{
-  width:14px!important;
-  display:block!important;
-}
-#documentsModal #documentList::-webkit-scrollbar-track{
-  background:#e7eee9!important;
-  border-radius:8px!important;
-}
-#documentsModal #documentList::-webkit-scrollbar-thumb{
-  background:#6b8d84!important;
-  border:3px solid #e7eee9!important;
-  border-radius:8px!important;
-}
-#documentsModal .modal-actions{
-  flex:0 0 auto!important;
-  margin-top:12px!important;
-  padding-top:10px!important;
-  background:var(--paper)!important;
-}
-@media(max-width:850px){
-  #documentsModal .documents-modal{
-    width:calc(100% - 16px)!important;
-    height:85vh!important;
-    height:85dvh!important;
-    max-height:85vh!important;
-    max-height:85dvh!important;
-    padding:22px 14px 16px!important;
-  }
-  #documentsModal #documentList{
-    padding-right:10px!important;
-  }
-}
-
-
-/* Documentos en desplegables interactivos para consulta. */
-.document-accordion{
-  display:block!important;
-  margin:0 0 10px!important;
-  border:1px solid var(--line)!important;
-  border-radius:10px!important;
-  background:#fff!important;
-  overflow:hidden!important;
-}
-.document-accordion>summary{
-  display:flex!important;
-  align-items:center!important;
-  gap:12px!important;
-  min-height:64px!important;
-  padding:12px 14px!important;
-  cursor:pointer!important;
-  list-style:none!important;
-  user-select:none!important;
-  -webkit-tap-highlight-color:transparent!important;
-}
-.document-accordion>summary::-webkit-details-marker{display:none!important}
-.document-accordion>summary:focus-visible{
-  outline:3px solid var(--coral)!important;
-  outline-offset:-3px!important;
-}
-.document-accordion-icon{
-  display:grid!important;
-  place-items:center!important;
-  flex:0 0 34px!important;
-  width:34px!important;
-  height:34px!important;
-  border-radius:9px!important;
-  background:var(--mint)!important;
-  color:var(--navy)!important;
-  font-size:18px!important;
-}
-.document-accordion-title{
-  display:grid!important;
-  min-width:0!important;
-  gap:3px!important;
-  flex:1 1 auto!important;
-}
-.document-accordion-title strong{
-  overflow-wrap:anywhere!important;
-  word-break:break-word!important;
-  font-size:13px!important;
-  line-height:1.35!important;
-}
-.document-accordion-title small{
-  color:var(--muted)!important;
-  font-size:10px!important;
-  line-height:1.35!important;
-}
-.document-accordion-chevron{
-  flex:0 0 28px!important;
-  color:var(--coral)!important;
-  font-size:22px!important;
-  line-height:1!important;
-  text-align:center!important;
-}
-.document-accordion[open] .document-accordion-chevron{font-size:0!important}
-.document-accordion[open] .document-accordion-chevron:after{content:"−";font-size:22px!important}
-.document-accordion-body{
-  border-top:1px solid var(--line)!important;
-  padding:14px 14px 16px 60px!important;
-  background:var(--paper)!important;
-}
-.document-accordion-body .document-description{
-  margin:0 0 12px!important;
-  color:var(--ink)!important;
-  font-size:11px!important;
-  line-height:1.5!important;
-}
-.document-accordion-body .document-description-empty{
-  color:var(--muted)!important;
-}
-.document-accordion-body .document-open{
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  min-height:40px!important;
-  padding:9px 13px!important;
-  border:1px solid var(--line)!important;
-  border-radius:7px!important;
-  background:#fff!important;
-  color:var(--ink)!important;
-  font-size:11px!important;
-  font-weight:700!important;
-}
-.document-accordion-body .document-open:hover,
-.document-accordion-body .document-open:focus-visible{
-  border-color:var(--coral)!important;
-  background:var(--coral-light)!important;
-}
-@media(max-width:850px){
-  .document-accordion>summary{min-height:68px!important;padding:12px 10px!important;gap:9px!important}
-  .document-accordion-body{padding:13px 10px 15px 52px!important}
-  .document-accordion-title strong{font-size:12px!important}
-  .document-accordion-body .document-open{width:100%!important;min-height:44px!important}
-}
-
-
-/* Confirmaciones de incidencias: siempre visibles por encima de la barra inferior. */
-.toast{
-  z-index:20000!important;
-  top:82px!important;
-  bottom:auto!important;
-  max-width:min(92vw,520px)!important;
-  text-align:center!important;
-  pointer-events:none!important;
-}
-@media(max-width:850px){
-  .toast{top:68px!important;bottom:auto!important;}
-}
-
-/* Confirmación y estados de solicitudes: el estado se entiende también sin color. */
-.incident-submission-status{display:flex;align-items:flex-start;gap:12px;margin:0 0 18px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px;line-height:1.45}
-.incident-submission-status[hidden]{display:none}
-.incident-submission-status.is-sent{border-color:#9fc8df;background:var(--blue);color:#28566e}
-.incident-submission-status.is-error{border-color:#e4a090;background:#fff0eb;color:#8e3f31}
-.submission-status-symbol{display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:#4d87a4;color:#fff;font-weight:800}
-.is-error .submission-status-symbol{background:#c95d4a}
-.incident-submission-status strong{display:block;font-size:13px;margin-bottom:3px}
-.incident-submission-status p{margin:3px 0}
-.incident-submission-status code{font-size:10px;overflow-wrap:anywhere}
-.incident-submission-status button{margin-top:8px;padding:7px 10px}
-.incident-status{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
-.incident-status.status-pending{color:#28566e;background:var(--blue)}
-.incident-status.status-reviewed{color:#85651e;background:var(--yellow)}
-.incident-status.status-resolved{color:#39764b;background:var(--green)}
-.incident-status.status-cancelled{color:#8e3f31;background:#fff0eb}
-.incident-status.status-sending{color:#5f6d70;background:#edf0ef}
-.incident-status .status-symbol{font-weight:800}
-.incident-updated-at{display:block;margin-top:3px;color:var(--muted);font-size:10px}
-@media(max-width:850px){
-  .incident-submission-status{margin-bottom:14px;padding:12px}
-  .incident-status{grid-column:2;justify-self:start;margin-top:4px}
-}
-
-/* Confirmación visible tras enviar una incidencia o sugerencia. */
-.incident-submission-status.is-popup{
-  position:fixed!important;
-  top:50%!important;
-  left:50%!important;
-  z-index:1001!important;
-  width:min(90vw,420px)!important;
-  margin:0!important;
-  transform:translate(-50%,-50%)!important;
-  box-shadow:0 18px 50px rgba(23,52,58,.25)!important;
-  border:2px solid #79a98b!important;
-  background:#fff!important;
-  color:var(--ink)!important;
-}
-.incident-submission-status.is-popup strong{font-size:15px!important;color:#28566e!important}
-
-/* Última posición del aviso: separado de la barra inferior del móvil. */
-.toast{position:fixed!important;top:88px!important;bottom:auto!important;z-index:20000!important;}
-@media(max-width:850px){.toast{top:82px!important;bottom:auto!important;}}
