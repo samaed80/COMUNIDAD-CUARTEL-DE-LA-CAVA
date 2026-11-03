@@ -1,4 +1,4 @@
-const CACHE_NAME = "cuartel-de-la-cava-pwa-v59";
+const CACHE_NAME = "cuartel-de-la-cava-pwa-v60";
 const APP_SHELL = [
   "./",
   "./index.html",
