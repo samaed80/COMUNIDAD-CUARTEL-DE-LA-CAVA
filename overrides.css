@@ -959,3 +959,15 @@
   -webkit-overflow-scrolling:touch;
 }
 .documents-modal .modal-actions:last-child{flex:0 0 auto;}
+
+/* El texto de las incidencias no se recorta ni muestra puntos suspensivos. */
+.incident-carousel .incident-card p{
+  display:block !important;
+  -webkit-line-clamp:unset !important;
+  -webkit-box-orient:initial !important;
+  overflow:visible !important;
+  max-height:none !important;
+  white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;
+  word-break:break-word !important;
+}
