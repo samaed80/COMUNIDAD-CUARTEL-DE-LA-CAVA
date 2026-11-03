@@ -20,6 +20,11 @@ function doPost(event) {
     if (type === 'sugerencia') return jsonResponse({ ok: true, skipped: true, no_email: true });
     if (type !== 'incidencia') return jsonResponse({ ok: false, error: 'invalid_type' });
 
+    const aliases = GmailApp.getAliases().map(function(alias) { return alias.toLowerCase(); });
+    if (aliases.indexOf(CONFIG.sender.toLowerCase()) === -1) {
+      return jsonResponse({ ok: false, error: 'sender_alias_not_configured' });
+    }
+
     const title = String(payload.title || 'Sin título').trim();
     const message = String(payload.body || payload.message || '').trim();
     const location = String(payload.location || 'No indicado').trim();
@@ -33,8 +38,11 @@ function doPost(event) {
       'Puedes revisar la incidencia desde el perfil de administrador.'
     ].join('\n');
 
-    GmailApp.sendEmail(CONFIG.recipients.join(','), subject, body);
-    return jsonResponse({ ok: true, recipients: CONFIG.recipients });
+    GmailApp.sendEmail(CONFIG.recipients.join(','), subject, body, {
+      from: CONFIG.sender,
+      name: 'Comunidad Cuartel de la Cava'
+    });
+    return jsonResponse({ ok: true, sender: CONFIG.sender, recipients: CONFIG.recipients });
   } catch (error) {
     return jsonResponse({ ok: false, error: String(error.message || error) });
   }
