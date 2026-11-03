@@ -472,7 +472,7 @@ function removePortalReferences(){
   const incidentTitle=document.querySelector('#incidentForm input[name="title"]');
   if(incidentTitle)incidentTitle.placeholder='Por ejemplo: luz fundida en las zonas comunes';
 }
-renderCurrentDate(); renderNotices(); renderCalendar(); renderIncidents(); removePortalReferences(); syncDocumentPermissions(); updatePushButton(); initSupabase().then(()=>{updatePushButton();refreshChatNotifications(false);openNeighborRecoveryFromLink();setInterval(()=>{refreshChatNotifications(true);refreshNoveltyNotifications();},12000);});
+renderCurrentDate(); renderNotices(); renderCalendar(); renderIncidents(); removePortalReferences(); syncDocumentPermissions(); updatePushButton(); initSupabase().then(async()=>{if(currentRole==='neighbor'&&supabaseSession){await refreshNeighborProfile();renderIncidents();}updatePushButton();refreshChatNotifications(false);openNeighborRecoveryFromLink();setInterval(()=>{refreshChatNotifications(true);refreshNoveltyNotifications();},12000);});
 
 
 // Instalación y compartir la aplicación.
