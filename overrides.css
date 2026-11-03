@@ -819,3 +819,15 @@
   .community-chat-modal form{flex:0 0 auto;margin-top:10px}
   .community-chat-modal form textarea{min-height:72px;max-height:120px}
 }
+
+
+/* Los avisos largos deben poder leerse completos. */
+.notice-card .notice-copy p{
+  display:block !important;
+  -webkit-line-clamp:unset !important;
+  -webkit-box-orient:initial !important;
+  overflow:visible !important;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
