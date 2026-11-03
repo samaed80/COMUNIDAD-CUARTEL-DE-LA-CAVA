@@ -12,6 +12,7 @@ let remoteIncidents = [];
 const LIST_PAGE_SIZE=10;
 let noticePage=0,noticeTotal=0,incidentPage=0,incidentTotal=0;
 let noticeCarouselIndex=0;
+let incidentCarouselIndex=0,suggestionCarouselIndex=0;
 let showIncidentHistory = false;
 let automaticIncidentEmail = false;
 const incidentActionsInFlight = new Set();
@@ -142,6 +143,35 @@ async function openIncidentPhotos(incidentId,incidentIndex=-1){
     if(first)window.open(first,'_blank','noopener');
   }
 }function renderIncidentList(list,items,empty){if(!list)return;list.innerHTML=items.length?items.map((item,index)=>incidentCard(item,index)).join(''):`<p class="documents-empty">${empty}</p>`;list.querySelectorAll('[data-incident-status]').forEach(button=>button.onclick=()=>updateIncidentStatus(button.dataset.incidentId,button.dataset.incidentStatus));list.querySelectorAll('[data-incident-email]').forEach(button=>button.onclick=()=>sendIncidentNow(button.dataset.incidentEmail));list.querySelectorAll('[data-incident-delete]').forEach(button=>button.onclick=()=>deleteRemoteIncident(button.dataset.incidentDelete));list.querySelectorAll('[data-incident-photos]').forEach(button=>button.onclick=()=>openIncidentPhotos(button.dataset.incidentPhotos,button.dataset.incidentIndex));list.querySelectorAll('[data-incident-key]').forEach(card=>card.onclick=event=>{if(event.target.closest('button'))return;const key=card.dataset.incidentKey;if(!key)return;const section=String(card.dataset.incidentType||'').toLowerCase()==='sugerencia'?'comunidad-seen-suggestions':'comunidad-seen-incidents';writeSeenIds(section,readSeenIds(section).concat(key));writeSeenIds(section.replace('comunidad-seen-','comunidad-top-seen-'),readSeenIds(section.replace('comunidad-seen-','comunidad-top-seen-')).concat(key));refreshNoveltyNotifications();renderIncidents();});}
+
+/* Incidencias y sugerencias también se consultan como carruseles independientes. */
+function renderIncidentList(list,items,empty){
+  if(!list)return;
+  const suggestion=list.id==='suggestionList';
+  const index=Math.min(suggestion?suggestionCarouselIndex:incidentCarouselIndex,Math.max(items.length-1,0));
+  if(suggestion)suggestionCarouselIndex=index;else incidentCarouselIndex=index;
+  const prefix=suggestion?'suggestion':'incident';
+  const previous=document.querySelector('#'+prefix+'PrevBtn'),next=document.querySelector('#'+prefix+'NextBtn'),position=document.querySelector('#'+prefix+'CarouselPosition');
+  if(!items.length){
+    list.innerHTML='<p class="documents-empty">'+empty+'</p>';
+    if(previous)previous.hidden=true;
+    if(next)next.hidden=true;
+    if(position)position.textContent='';
+    return;
+  }
+  list.innerHTML=incidentCard(items[index],index);
+  if(previous)previous.hidden=items.length<2;
+  if(next)next.hidden=items.length<2;
+  if(position)position.textContent=(index+1)+' de '+items.length;
+  list.querySelectorAll('[data-incident-status]').forEach(button=>button.onclick=()=>updateIncidentStatus(button.dataset.incidentId,button.dataset.incidentStatus));
+  list.querySelectorAll('[data-incident-email]').forEach(button=>button.onclick=()=>sendIncidentNow(button.dataset.incidentEmail));
+  list.querySelectorAll('[data-incident-delete]').forEach(button=>button.onclick=()=>deleteRemoteIncident(button.dataset.incidentDelete));
+  list.querySelectorAll('[data-incident-photos]').forEach(button=>button.onclick=()=>openIncidentPhotos(button.dataset.incidentPhotos,button.dataset.incidentIndex));
+  list.querySelectorAll('[data-incident-key]').forEach(card=>card.onclick=event=>{if(event.target.closest('button'))return;const key=card.dataset.incidentKey;if(!key)return;const section=String(card.dataset.incidentType||'').toLowerCase()==='sugerencia'?'comunidad-seen-suggestions':'comunidad-seen-incidents';writeSeenIds(section,readSeenIds(section).concat(key));writeSeenIds(section.replace('comunidad-seen-','comunidad-top-seen-'),readSeenIds(section.replace('comunidad-seen-','comunidad-top-seen-')).concat(key));refreshNoveltyNotifications();renderIncidents();});
+  if(previous)previous.onclick=()=>{if(suggestion)suggestionCarouselIndex=(suggestionCarouselIndex-1+items.length)%items.length;else incidentCarouselIndex=(incidentCarouselIndex-1+items.length)%items.length;renderIncidents();};
+  if(next)next.onclick=()=>{if(suggestion)suggestionCarouselIndex=(suggestionCarouselIndex+1)%items.length;else incidentCarouselIndex=(incidentCarouselIndex+1)%items.length;renderIncidents();};
+}
+
 function renderIncidents(){const allItems=remoteIncidents.length?remoteIncidents:incidents;const terminal=['resolved','cancelled'];const active=allItems.filter(i=>!terminal.includes(String(i.status||'pending').toLowerCase()));const visible=currentRole==='admin'?(showIncidentHistory?allItems.filter(i=>terminal.includes(String(i.status||'').toLowerCase())):active):allItems.filter(i=>String(i.status||'pending').toLowerCase()==='reviewed');const incidentItems=visible.filter(i=>String(i.type||'Incidencia').toLowerCase()!=='sugerencia');const suggestionItems=visible.filter(i=>String(i.type||'').toLowerCase()==='sugerencia');renderIncidentList(incidentList,incidentItems,showIncidentHistory?'No hay incidencias cerradas en el histórico.':'Todavía no hay incidencias tramitadas.');renderIncidentList(suggestionList,suggestionItems,showIncidentHistory?'No hay sugerencias cerradas en el histórico.':'Todavía no hay sugerencias tramitadas.');const heading=document.querySelector('#incidentHeading'),note=document.querySelector('#incidentPermission'),toggle=document.querySelector('#incidentHistoryBtn');if(heading)heading.textContent=showIncidentHistory?'Histórico de incidencias y sugerencias':'Incidencias y sugerencias';if(note)note.textContent=currentRole==='admin'?(showIncidentHistory?'Actuaciones cerradas o eliminadas.':'Pendientes de tramitar o en seguimiento.'):'Aquí aparecen las comunicaciones que el administrador ya ha tramitado.';if(toggle)toggle.textContent=showIncidentHistory?'← Volver a incidencias':'Ver histórico';const summary=document.querySelector('#incidentResultsSummary');const processedCount=incidentItems.filter(item=>String(item.status||'').toLowerCase()==='reviewed').length;if(summary)summary.textContent=processedCount?'Mostrando '+processedCount+' incidencia'+(processedCount===1?'':'s')+' tramitada'+(processedCount===1?'':'s'):'';const more=document.querySelector('#incidentLoadMoreBtn');if(more){more.hidden=remoteIncidents.length>=incidentTotal||!incidentTotal;more.onclick=loadMoreIncidents;}}
 function escapeHtml(value=''){return String(value).replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[char]));}
 function renderDocuments(){
