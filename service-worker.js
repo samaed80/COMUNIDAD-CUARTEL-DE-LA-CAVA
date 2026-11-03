@@ -7,7 +7,7 @@ const APP_SHELL = [
   "./access-entry.css?v=5",
   "./navigation-fix.css?v=1",
   "./notification-overrides.js?v=2",
-  "./app.js?v=128",
+  "./app.js?v=131",
   "./manifest.webmanifest?v=1",
   "./icon.svg?v=3"
 ];
