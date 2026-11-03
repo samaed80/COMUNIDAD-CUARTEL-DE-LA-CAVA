@@ -843,3 +843,23 @@
   overflow-wrap:anywhere !important;
   word-break:break-word !important;
 }
+
+
+/* Altura libre para que los avisos extensos se lean completos. */
+.notice-card .notice-copy p{
+  display:block !important;
+  -webkit-line-clamp:unset !important;
+  -webkit-box-orient:initial !important;
+  overflow:visible !important;
+  height:auto !important;
+  max-height:none !important;
+  white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;
+  word-break:break-word !important;
+}
+.notice-card,
+.notice-card .notice-copy{
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
