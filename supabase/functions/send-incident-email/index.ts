@@ -198,7 +198,8 @@ Deno.serve(async (request) => {
       body: JSON.stringify({
         secret: webhookSecret,
         action: "tramitado",
-        type: isIncident ? "Incidencia" : "Sugerencia",
+        type: "Incidencia",
+        communication_type: isIncident ? "Incidencia" : "Sugerencia",
         sender_email: incidentSenderEmail,
         recipient_email: recipientList,
         recipients: isIncident ? incidentRecipientEmails : [incidentSenderEmail],
