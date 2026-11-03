@@ -66,6 +66,7 @@ Deno.serve(async (request) => {
   }
   const isIncident = communicationType === "incidencia";
   const recipientList = isIncident ? incidentRecipientList : suggestionRecipientList;
+  if (!isIncident) return response({ ok: true, skipped: true, no_email: true }, 200, origin);
   if (String(savedIncident.status || "").toLowerCase() !== "pending") {
     return response({ ok: false, error: "Solo se pueden enviar incidencias pendientes." }, 409, origin);
   }
