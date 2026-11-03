@@ -11,6 +11,7 @@ let remoteDocuments = [];
 let remoteIncidents = [];
 const LIST_PAGE_SIZE=10;
 let noticePage=0,noticeTotal=0,incidentPage=0,incidentTotal=0;
+let noticeCarouselIndex=0;
 let showIncidentHistory = false;
 let automaticIncidentEmail = false;
 const incidentActionsInFlight = new Set();
