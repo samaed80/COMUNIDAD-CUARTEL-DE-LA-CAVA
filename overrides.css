@@ -932,3 +932,13 @@
   .incident-carousel{gap:5px;}
   .incident-carousel-arrow{width:28px;height:28px;font-size:21px;}
 }
+
+/* Incidencias largas desplazables dentro de su marco. */
+.incident-carousel .incident-card{
+  max-height:min(520px,calc(100vh - 260px));
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+@media(max-width:600px){
+  .incident-carousel .incident-card{max-height:calc(100dvh - 310px);}
+}
