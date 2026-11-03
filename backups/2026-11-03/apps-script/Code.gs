@@ -38,11 +38,22 @@ function doPost(event) {
       'Puedes revisar la incidencia desde el perfil de administrador.'
     ].join('\n');
 
+    const attachments = (Array.isArray(payload.attachments) ? payload.attachments : []).map(function(item) {
+      const content = String(item && item.content || '');
+      if (!content) return null;
+      return Utilities.newBlob(
+        Utilities.base64Decode(content),
+        String(item.mimeType || 'application/octet-stream'),
+        String(item.filename || 'foto')
+      );
+    }).filter(function(item) { return item !== null; });
+
     GmailApp.sendEmail(CONFIG.recipients.join(','), subject, body, {
       from: CONFIG.sender,
-      name: 'Comunidad Cuartel de la Cava'
+      name: 'Comunidad Cuartel de la Cava',
+      attachments: attachments
     });
-    return jsonResponse({ ok: true, sender: CONFIG.sender, recipients: CONFIG.recipients });
+    return jsonResponse({ ok: true, sender: CONFIG.sender, recipients: CONFIG.recipients, attachments_sent: attachments.length });
   } catch (error) {
     return jsonResponse({ ok: false, error: String(error.message || error) });
   }
