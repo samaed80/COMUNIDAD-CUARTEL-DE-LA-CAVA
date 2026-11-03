@@ -942,3 +942,20 @@
 @media(max-width:600px){
   .incident-carousel .incident-card{max-height:calc(100dvh - 310px);}
 }
+
+/* Modal de documentos contenido también en Safari de escritorio. */
+.documents-modal{
+  display:flex;
+  flex-direction:column;
+  max-height:calc(100dvh - 32px);
+  overflow:hidden;
+}
+.documents-modal .document-list{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:none;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+.documents-modal .modal-actions:last-child{flex:0 0 auto;}
