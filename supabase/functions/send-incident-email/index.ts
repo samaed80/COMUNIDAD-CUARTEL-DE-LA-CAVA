@@ -12,6 +12,7 @@ const incidentRecipientEmails = [
   "gestion@proedyo.com",
 ];
 const incidentRecipientList = incidentRecipientEmails.join(", ");
+const suggestionRecipientList = incidentSenderEmail;
 
 function response(body: unknown, status: number, origin: string | null) {
   const headers = new Headers({ "Content-Type": "application/json", "Vary": "Origin" });
@@ -59,9 +60,12 @@ Deno.serve(async (request) => {
     .eq("id", incidentId)
     .maybeSingle();
   if (incidentError || !savedIncident) return response({ ok: false, error: "No se encontró la incidencia." }, 404, origin);
-  if (String(savedIncident.type || "").toLowerCase() !== "incidencia") {
-    return response({ ok: false, error: "El envío de correo solo está disponible para incidencias." }, 409, origin);
+  const communicationType = String(savedIncident.type || "").toLowerCase();
+  if (!['incidencia', 'sugerencia'].includes(communicationType)) {
+    return response({ ok: false, error: "Tipo de comunicación no válido." }, 409, origin);
   }
+  const isIncident = communicationType === "incidencia";
+  const recipientList = isIncident ? incidentRecipientList : suggestionRecipientList;
   if (String(savedIncident.status || "").toLowerCase() !== "pending") {
     return response({ ok: false, error: "Solo se pueden enviar incidencias pendientes." }, 409, origin);
   }
@@ -76,7 +80,7 @@ Deno.serve(async (request) => {
       .update({
         email_status: "failed",
         email_error: "El intento anterior quedó interrumpido; se puede reenviar.",
-        recipient_email: incidentRecipientList,
+        recipient_email: recipientList,
         updated_at: new Date().toISOString(),
       })
       .eq("id", incidentId)
@@ -99,8 +103,8 @@ Deno.serve(async (request) => {
   if (!manual) {
     const { data: settings, error: settingsError } = await adminClient
       .from("community_settings").select("automatic_incident_email").eq("id", true).maybeSingle();
-    if (settingsError) return response({ ok: false, error: "No se pudo comprobar el ajuste de envío automático." }, 503, origin);
-    if (!settings?.automatic_incident_email) return response({ ok: true, skipped: true }, 200, origin);
+    if (settingsError && isIncident) return response({ ok: false, error: "No se pudo comprobar el ajuste de envío automático." }, 503, origin);
+    if (isIncident && !settings?.automatic_incident_email) return response({ ok: true, skipped: true }, 200, origin);
   }
 
   const { data: resident } = await adminClient
@@ -140,7 +144,7 @@ Deno.serve(async (request) => {
   // Reserva atómica: evita que el automático y el botón de tramitación envíen duplicados.
   const { data: claim, error: claimError } = await adminClient
     .from("community_incident_notifications")
-    .update({ email_status: "sending", email_error: null, recipient_email: incidentRecipientList, updated_at: new Date().toISOString() })
+    .update({ email_status: "sending", email_error: null, recipient_email: recipientList, updated_at: new Date().toISOString() })
     .eq("id", incidentId)
     .in("email_status", ["not_sent", "failed"])
     .is("sent_at", null)
@@ -182,7 +186,7 @@ Deno.serve(async (request) => {
     const errorMessage = error instanceof Error ? error.message : "No se pudo preparar la foto para el correo.";
     await adminClient.from("community_incident_notifications").update({
       email_status: "failed", email_error: errorMessage.slice(0, 1000), sent_at: null,
-      recipient_email: incidentRecipientList, updated_at: new Date().toISOString(),
+      recipient_email: recipientList, updated_at: new Date().toISOString(),
     }).eq("id", incidentId);
     return response({ ok: false, error: errorMessage }, 502, origin);
   }
@@ -194,12 +198,12 @@ Deno.serve(async (request) => {
       body: JSON.stringify({
         secret: webhookSecret,
         action: "tramitado",
-        type: "Incidencia",
+        type: isIncident ? "Incidencia" : "Sugerencia",
         sender_email: incidentSenderEmail,
-        recipient_email: incidentRecipientList,
-        recipients: incidentRecipientEmails,
+        recipient_email: recipientList,
+        recipients: isIncident ? incidentRecipientEmails : [incidentSenderEmail],
         from: incidentSenderEmail,
-        to: incidentRecipientList,
+        to: recipientList,
         subject,
         title,
         message: body,
@@ -218,7 +222,7 @@ Deno.serve(async (request) => {
     const result = await mailResponse.json().catch(() => null);
     if (!mailResponse.ok || !result?.ok) throw new Error(String(result?.error || `El servicio de correo rechazó la incidencia (HTTP ${mailResponse.status}).`));
     const { error: finalizeError } = await adminClient.from("community_incident_notifications").update({
-      email_status: "sent", email_error: null, sent_at: new Date().toISOString(), recipient_email: incidentRecipientList,
+      email_status: "sent", email_error: null, sent_at: new Date().toISOString(), recipient_email: recipientList,
     }).eq("id", incidentId);
     if (finalizeError) {
       console.error("incident-email-finalize", { incidentId, error: finalizeError.message });
@@ -230,7 +234,7 @@ Deno.serve(async (request) => {
     console.error("incident-email-send", { incidentId, error: errorMessage });
     const { error: failureUpdateError } = await adminClient.from("community_incident_notifications").update({
       email_status: "failed", email_error: errorMessage.slice(0, 1000), sent_at: null,
-      recipient_email: incidentRecipientList, updated_at: new Date().toISOString(),
+      recipient_email: recipientList, updated_at: new Date().toISOString(),
     }).eq("id", incidentId);
     if (failureUpdateError) console.error("incident-email-failure-state", { incidentId, error: failureUpdateError.message });
     return response({ ok: false, error: errorMessage }, 502, origin);
